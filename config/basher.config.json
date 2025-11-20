@@ -58,5 +58,41 @@
     "level": "info",
     "enableColors": true,
     "timestampFormat": "ISO"
+  },
+  "swarm": {
+    "enabled": true,
+    "heartbeatIntervalSec": 20,
+    "nodes": [
+      {
+        "id": "rig-main",
+        "transport": "fastapi",
+        "url": "http://localhost:8000",
+        "roles": ["kuhul", "trainer", "primary"]
+      },
+      {
+        "id": "kuhul-core",
+        "transport": "fastapi",
+        "url": "http://localhost:9009",
+        "roles": ["kuhul", "inference", "mx2lm"]
+      },
+      {
+        "id": "mx2lm-server",
+        "transport": "fastapi",
+        "url": "http://localhost:8001",
+        "roles": ["mx2lm", "language-model", "prediction"]
+      },
+      {
+        "id": "ghost-edge",
+        "transport": "dns",
+        "domain": "ghost.asx.net",
+        "roles": ["relay", "ghost", "covert"]
+      },
+      {
+        "id": "cloud-gateway",
+        "transport": "cloudflare",
+        "url": "https://asx-tunnel.trycloudflare.com",
+        "roles": ["public", "api-gateway", "external"]
+      }
+    ]
   }
 }

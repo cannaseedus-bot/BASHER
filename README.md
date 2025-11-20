@@ -1,4 +1,4 @@
-# BASHER v3.5 - Tri-Tunnel Orchestrator + Ghost Network Mode
+# BASHER v4.0 - Swarm Mode Multi-Agent Mesh
 
 ```
 ╔═══════════════════════════════════════╗
@@ -10,23 +10,61 @@
 ║  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝            ║
 ║                                       ║
 ║  B A S H E R   D A E M O N            ║
-║  v3.5 - Ghost Network Mode            ║
+║  v4.0 - Swarm Mode                    ║
 ╚═══════════════════════════════════════╝
 ```
 
-**Fast as a jackrabbit. Focused like a neural laser.**
+**Fast as a jackrabbit. Focused like a neural laser. Networked like a swarm.**
 
 ---
 
 ## Overview
 
-BASHER v3.5 is a **production-ready network daemon** that orchestrates three independent tunnel modes:
+BASHER v4.0 is a **production-ready network daemon** with multi-agent mesh capabilities:
 
 1. **Cloudflare Tunnel** - Public HTTP gateway for KHL/KUHUL services
 2. **DNS Ghost Network** - Stealth covert channel using DNS-over-SCXQ2 encoding
 3. **FastAPI Monitoring** - Health checks for local model servers
+4. **🆕 Swarm Mode** - Multi-agent mesh routing with intelligent task distribution
 
-This is not a toy. This is an **operational ASX-grade networking daemon**.
+This is **operational ASX-grade networking infrastructure** with swarm intelligence.
+
+---
+
+## What's New in v4.0
+
+### 🐝 Swarm Mode
+
+A mesh network of BASHER nodes with:
+
+- **Role-based routing**: Automatically route tasks to nodes with matching roles
+- **Health monitoring**: Continuous health checks across all transports
+- **Latency-aware selection**: Pick the fastest node for each task
+- **Broadcast**: Send to all healthy nodes simultaneously
+- **Multi-transport**: HTTP, FastAPI, Cloudflare, and DNS Ghost
+- **Automatic failover**: Routes around unhealthy nodes
+
+### Architecture
+
+```
+                    ┌─────────────────┐
+                    │   BASHER v4.0   │
+                    │   Orchestrator  │
+                    └────────┬────────┘
+                             │
+        ┌────────────────────┼────────────────────┐
+        │                    │                    │
+        ▼                    ▼                    ▼
+┌───────────────┐   ┌───────────────┐   ┌───────────────┐
+│ rig-main      │   │ kuhul-core    │   │ ghost-edge    │
+│ (FastAPI)     │   │ (FastAPI)     │   │ (DNS)         │
+│ trainer+kuhul │   │ inference+mx2lm│   │ relay+covert  │
+└───────────────┘   └───────────────┘   └───────────────┘
+        │                    │                    │
+        └────────────────────┼────────────────────┘
+                             │
+                      Swarm Mesh Network
+```
 
 ---
 
@@ -40,12 +78,21 @@ This is not a toy. This is an **operational ASX-grade networking daemon**.
 
 ### 🔒 SCXQ2 DNS-Tunnel
 
-- Works when HTTPS is blocked
-- Works behind corporate firewalls
-- Uses DNS (UDP 53) - the ONE port nobody blocks
-- Fragmentation support for large payloads
-- Checksum validation
-- Bidirectional communication
+- Works when HTTPS is blocked ✓
+- Works behind corporate firewalls ✓
+- Uses DNS (UDP 53) - the ONE port nobody blocks ✓
+- Fragmentation support for large payloads ✓
+- Checksum validation ✓
+- Bidirectional communication ✓
+
+### 🐝 Swarm Mode Features
+
+- **Intelligent routing**: Role-based + latency-aware
+- **Health monitoring**: Continuous checks for all nodes
+- **Multi-transport**: HTTP, DNS, Cloudflare
+- **Task distribution**: Automatic best-node selection
+- **Broadcast mode**: Send to all nodes
+- **Failover**: Auto-routes around unhealthy nodes
 
 ### 🎮 XJSON Integration
 
@@ -53,13 +100,6 @@ This is not a toy. This is an **operational ASX-grade networking daemon**.
 - Drop-in integration with KHL
 - Browser console interface
 - RESTful API
-
-### 📊 Monitoring
-
-- Network connectivity checks
-- Automatic tunnel restart
-- Health statistics
-- Error tracking
 
 ---
 
@@ -74,77 +114,73 @@ This is not a toy. This is an **operational ASX-grade networking daemon**.
 ### Quick Start
 
 ```bash
-# Clone or extract BASHER
 cd BASHER
 
-# Install Node dependencies
-npm install
+# Install
+./install.sh
 
-# Install Python dependencies (for Ghost DNS server)
-cd ghost-server
-pip3 install -r requirements.txt
-cd ..
-
-# Start BASHER daemon
+# Run daemon
 npm start
+
+# Open browser console
+open http://localhost:3000
 ```
 
 ---
 
 ## Configuration
 
-Edit `config/basher.config.json`:
+Edit `config/basher.config.json` to configure the four subsystems:
+
+### Swarm Configuration
 
 ```json
 {
-  "server": {
-    "port": 3000,
-    "host": "0.0.0.0",
-    "enableCors": true
-  },
-  "cloudflare": {
+  "swarm": {
     "enabled": true,
-    "label": "asx-basher",
-    "url": "http://localhost:3000",
-    "command": "cloudflared",
-    "args": ["tunnel", "--url", "http://localhost:3000"],
-    "heartbeatIntervalSec": 30,
-    "autoRestart": true
-  },
-  "dnsGhost": {
-    "enabled": true,
-    "resolver": "1.1.1.1",
-    "domain": "ghost.asx.net",
-    "heartbeatIntervalSec": 60,
-    "tunnel": {
-      "enabled": true,
-      "fragmentSize": 40,
-      "maxFragments": 10
-    }
-  },
-  "fastapi": {
-    "enabled": true,
-    "targets": [
-      { "name": "fastapi-main", "url": "http://localhost:8000/health" },
-      { "name": "fastapi-kuhul", "url": "http://localhost:9009/health" }
-    ],
-    "heartbeatIntervalSec": 15
+    "heartbeatIntervalSec": 20,
+    "nodes": [
+      {
+        "id": "rig-main",
+        "transport": "fastapi",
+        "url": "http://localhost:8000",
+        "roles": ["kuhul", "trainer", "primary"]
+      },
+      {
+        "id": "kuhul-core",
+        "transport": "fastapi",
+        "url": "http://localhost:9009",
+        "roles": ["kuhul", "inference", "mx2lm"]
+      },
+      {
+        "id": "ghost-edge",
+        "transport": "dns",
+        "domain": "ghost.asx.net",
+        "roles": ["relay", "ghost", "covert"]
+      },
+      {
+        "id": "cloud-gateway",
+        "transport": "cloudflare",
+        "url": "https://asx-tunnel.trycloudflare.com",
+        "roles": ["public", "api-gateway", "external"]
+      }
+    ]
   }
 }
 ```
 
-### Key Configuration Options
+### Node Properties
 
-- **cloudflare.enabled**: Enable/disable Cloudflare tunnel
-- **dnsGhost.enabled**: Enable/disable Ghost DNS tunnel
-- **dnsGhost.tunnel.enabled**: Enable DNS tunnel data transport
-- **fastapi.targets**: Add your local service endpoints
+- `id`: Unique identifier for the node
+- `transport`: `fastapi`, `http`, `cloudflare`, or `dns`
+- `url` or `domain`: Endpoint address
+- `roles`: Array of roles for intelligent routing
 
 ---
 
 ## XJSON Handlers
 
-BASHER exposes the following XJSON handlers:
+BASHER v4.0 exposes these handlers for KHL/KUHUL integration:
 
 ### Core Handlers
 
@@ -153,142 +189,207 @@ BASHER exposes the following XJSON handlers:
 - `core.stats` - Process statistics
 - `core.version` - Version info
 
-### BASHER Handlers
+### Basher Handlers (Tri-Tunnel)
 
-- `basher.status` - Full tri-tunnel status
+- `basher.status` - Full tri-tunnel status dump
 - `basher.network` - Network and endpoints (KHL-friendly)
-- `basher.forceCloudflareRestart` - Restart Cloudflare tunnel
 - `basher.dnsSend` - Send message via DNS tunnel
 - `basher.dnsPing` - Ping Ghost DNS network
+- `basher.forceCloudflareRestart` - Restart Cloudflare tunnel
 - `basher.checkTarget` - Check specific FastAPI target
 
-### Example XJSON Call
+### 🆕 Swarm Handlers
+
+- `basher.swarm.status` - Get swarm mesh status
+- `basher.swarm.pick` - Pick best node for a task
+- `basher.swarm.route` - Route payload to best node
+- `basher.swarm.broadcast` - Broadcast to all healthy nodes
+- `basher.swarm.send` - Send to specific node by ID
+- `basher.swarm.healthCheck` - Force health check
+
+---
+
+## Swarm Mode Usage
+
+### Get Swarm Status
 
 ```bash
 curl -X POST http://localhost:3000/xjson/run \
   -H "Content-Type: application/json" \
   -d '{
     "program": {
-      "type": "basher.status",
+      "type": "basher.swarm.status",
       "input": {}
+    }
+  }'
+```
+
+Response:
+```json
+{
+  "ok": true,
+  "swarm": {
+    "enabled": true,
+    "nodes": [
+      {
+        "id": "rig-main",
+        "transport": "fastapi",
+        "url": "http://localhost:8000",
+        "roles": ["kuhul", "trainer"],
+        "healthy": true,
+        "latency": 23,
+        "lastCheck": 1732064123456
+      }
+    ],
+    "healthyCount": 3,
+    "lastHeartbeat": 1732064123456
+  }
+}
+```
+
+### Pick Best Node for a Task
+
+```bash
+curl -X POST http://localhost:3000/xjson/run \
+  -H "Content-Type: application/json" \
+  -d '{
+    "program": {
+      "type": "basher.swarm.pick",
+      "input": {
+        "task": "kuhul inference job"
+      }
+    }
+  }'
+```
+
+The router will:
+1. Find nodes with "kuhul" or "inference" in roles
+2. Prefer nodes with lower latency
+3. Return the best match
+
+### Route a Payload
+
+```bash
+curl -X POST http://localhost:3000/xjson/run \
+  -H "Content-Type: application/json" \
+  -d '{
+    "program": {
+      "type": "basher.swarm.route",
+      "input": {
+        "task": "kuhul trainer",
+        "payload": {
+          "type": "core.ping",
+          "input": {}
+        }
+      }
+    }
+  }'
+```
+
+Response:
+```json
+{
+  "ok": true,
+  "node": {
+    "id": "rig-main",
+    "transport": "fastapi"
+  },
+  "result": {
+    "ok": true,
+    "pong": true,
+    "timestamp": 1732064123456
+  }
+}
+```
+
+### Broadcast to All Nodes
+
+```bash
+curl -X POST http://localhost:3000/xjson/run \
+  -H "Content-Type: application/json" \
+  -d '{
+    "program": {
+      "type": "basher.swarm.broadcast",
+      "input": {
+        "payload": {
+          "type": "core.version",
+          "input": {}
+        }
+      }
+    }
+  }'
+```
+
+Returns results from all healthy nodes.
+
+---
+
+## DNS Ghost Network
+
+### Packet Format
+
+DNS query:
+```
+cmd.9f3a.00-03.YXN4LWJhc2hlcg.ghost.asx.net
+└┬┘ └┬─┘ └┬──┘ └──────┬──────┘
+ │   │    │           │
+ │   │    │           └─ SCXQ2-encoded payload
+ │   │    └───────────── Fragment index/total
+ │   └────────────────── Nonce (replay protection)
+ └────────────────────── Message type
+```
+
+TXT record response:
+```
+SCXQ2:9f3a:00-01:checksum:payload
+```
+
+### Using the DNS Tunnel
+
+```bash
+curl -X POST http://localhost:3000/xjson/run \
+  -H "Content-Type: application/json" \
+  -d '{
+    "program": {
+      "type": "basher.dnsSend",
+      "input": {
+        "message": "{\"task\": \"ping\"}"
+      }
     }
   }'
 ```
 
 ---
 
-## DNS Ghost Network
-
-### Architecture
-
-The DNS Ghost Network is a **covert communication channel** that uses DNS queries to transport SCXQ2-encoded messages.
-
-```
-┌─────────────┐           DNS Query            ┌─────────────┐
-│   BASHER    │ ────────────────────────────> │  Ghost DNS  │
-│   Client    │                                 │   Server    │
-│             │ <──────────────────────────── │             │
-└─────────────┘           TXT Record           └─────────────┘
-```
-
-### Packet Format
-
-DNS query name:
-```
-<type>.<nonce>.<frag>-<total>.<payload>.ghost.asx.net
-```
-
-Example:
-```
-cmd.9f3a.00-03.YXN4LWJhc2hlcg.ghost.asx.net
-```
-
-TXT record response:
-```
-SCXQ2:<nonce>:<frag>-<total>:<payload>
-```
-
-### Using the DNS Tunnel
-
-#### From XJSON
-
-```json
-{
-  "program": {
-    "type": "basher.dnsSend",
-    "input": {
-      "message": "{\"task\": \"ping\"}"
-    }
-  }
-}
-```
-
-#### From KHL
-
-```javascript
-const result = await xjsonCall('basher.dnsSend', {
-  message: JSON.stringify({ task: 'status' })
-});
-
-console.log('Ghost response:', result.response);
-```
-
-### Setting Up Ghost DNS Server
-
-#### Option 1: Local Testing (Port 5353)
-
-```bash
-cd ghost-server
-python3 index.py
-```
-
-Then point BASHER to your local resolver:
-```json
-"dnsGhost": {
-  "resolver": "127.0.0.1:5353",
-  "domain": "ghost.asx.net"
-}
-```
-
-#### Option 2: Production (Authoritative DNS)
-
-1. **Get a domain** (e.g., `ghost.yourdomain.com`)
-2. **Point NS records** to your VPS
-3. **Run Ghost DNS server** on port 53:
-
-```bash
-sudo python3 ghost-server/index.py
-```
-
-4. **Configure BASHER**:
-
-```json
-"dnsGhost": {
-  "resolver": "1.1.1.1",
-  "domain": "ghost.yourdomain.com"
-}
-```
-
----
-
 ## Browser Console
 
-BASHER includes a browser-based terminal console.
-
-Access it at: `http://localhost:3000/`
+Access at `http://localhost:3000`
 
 ### Available Commands
 
 ```
-basher-status       Full BASHER daemon status
-basher-network      Network and endpoints
-dns-ping            Ping DNS ghost network
-dns-send [msg]      Send message via DNS tunnel
-handlers            List available XJSON handlers
-core-ping           Ping daemon
-core-info           System information
-clear               Clear screen
-help                Show help
+# Swarm commands
+swarm-status         Full swarm mesh status
+swarm-pick [task]    Pick best node for task
+swarm-health         Force health check
+
+# BASHER commands
+basher-status        Full BASHER daemon status
+basher-network       Network and endpoints
+dns-ping             Ping DNS ghost network
+dns-send [msg]       Send message via DNS tunnel
+
+# System commands
+handlers             List available XJSON handlers
+core-ping            Ping daemon
+core-info            System information
+core-stats           Process statistics
+
+# Terminal commands
+clear                Clear screen
+history              Show command history
+help                 Show help
+about                About BASHER
 ```
 
 ---
@@ -298,21 +399,37 @@ help                Show help
 ### From KHL Runtime
 
 ```javascript
-// In khl-runtime.js
-async function getBasherStatus() {
+// Get swarm status
+async function getSwarmStatus() {
   const response = await fetch('http://localhost:3000/xjson/run', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       program: {
-        type: 'basher.network',
+        type: 'basher.swarm.status',
         input: {}
       }
     })
   });
 
+  return await response.json();
+}
+
+// Route a task through swarm
+async function routeTask(task, payload) {
+  const response = await fetch('http://localhost:3000/xjson/run', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      program: {
+        type: 'basher.swarm.route',
+        input: { task, payload }
+      }
+    })
+  });
+
   const data = await response.json();
-  return data;
+  return data.result;
 }
 ```
 
@@ -321,12 +438,18 @@ async function getBasherStatus() {
 ```json
 {
   "routes": {
-    "refresh_basher": {
+    "train_model": {
       "call": {
         "xjson": {
           "program": {
-            "type": "basher.network",
-            "input": {}
+            "type": "basher.swarm.route",
+            "input": {
+              "task": "kuhul trainer",
+              "payload": {
+                "type": "kuhul.train",
+                "input": { "model": "mx2lm", "epochs": 10 }
+              }
+            }
           }
         }
       }
@@ -337,43 +460,49 @@ async function getBasherStatus() {
 
 ---
 
-## Running as Systemd Service
+## Bind9 DNS Setup
 
-Create `/etc/systemd/system/basher.service`:
-
-```ini
-[Unit]
-Description=BASHER v3.5 Daemon
-After=network.target
-
-[Service]
-Type=simple
-User=basher
-WorkingDirectory=/opt/basher
-ExecStart=/usr/bin/node index.js
-Restart=on-failure
-RestartSec=10
-StandardOutput=journal
-StandardError=journal
-SyslogIdentifier=basher
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Enable and start:
+For production Ghost Network deployment:
 
 ```bash
+# See bind9/ directory for full setup
+cd bind9
+cat README.md
+
+# Quick setup
+sudo cp named.conf.local.ghost /etc/bind/
+sudo nano /etc/bind/named.conf.local
+# Add: include "/etc/bind/named.conf.local.ghost";
+
+# Start Ghost DNS engine
+cd /opt/basher/ghost-server
+python3 index.py
+
+# Restart Bind9
+sudo systemctl restart bind9
+```
+
+See `bind9/README.md` for complete instructions.
+
+---
+
+## Running as Systemd Service
+
+```bash
+# Install BASHER daemon
+sudo cp systemd/basher.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable basher
 sudo systemctl start basher
-sudo systemctl status basher
-```
 
-View logs:
+# Install Ghost DNS server (optional)
+sudo cp systemd/basher-ghost.service /etc/systemd/system/
+sudo systemctl enable basher-ghost
+sudo systemctl start basher-ghost
 
-```bash
+# View logs
 journalctl -u basher -f
+journalctl -u basher-ghost -f
 ```
 
 ---
@@ -386,49 +515,81 @@ journalctl -u basher -f
 npm run dev
 ```
 
-This uses `node --watch` for auto-reload on file changes.
-
-### Testing XJSON Handlers
+### Testing Swarm Handlers
 
 ```bash
-# List handlers
+# List all handlers
 curl http://localhost:3000/xjson/handlers
 
-# Ping
+# Test swarm status
 curl -X POST http://localhost:3000/xjson/run \
-  -H "Content-Type: application/json" \
-  -d '{"program": {"type": "core.ping", "input": {}}}'
+  -d '{"program": {"type": "basher.swarm.status", "input": {}}}'
 
-# Get BASHER status
+# Test routing
 curl -X POST http://localhost:3000/xjson/run \
-  -H "Content-Type: application/json" \
-  -d '{"program": {"type": "basher.status", "input": {}}}'
+  -d '{"program": {"type": "basher.swarm.pick", "input": {"task": "inference"}}}'
 ```
 
 ---
 
-## Architecture
+## Architecture Diagrams
+
+### Swarm Routing Flow
+
+```
+User Request
+     │
+     ▼
+┌─────────────────┐
+│  BASHER v4.0    │
+│  Orchestrator   │
+└────────┬────────┘
+         │
+         │ basher.swarm.route
+         │ task="kuhul trainer"
+         ▼
+┌─────────────────┐
+│  Swarm Router   │
+│  - Role matching│
+│  - Latency sort │
+└────────┬────────┘
+         │
+         │ Pick: rig-main (50ms)
+         ▼
+┌─────────────────┐
+│   rig-main      │
+│   FastAPI Node  │
+│   POST /xjson/run│
+└────────┬────────┘
+         │
+         ▼
+    Execute Task
+```
+
+### Tri-Tunnel + Swarm Stack
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    BASHER Daemon                        │
-├─────────────────────────────────────────────────────────┤
+│                    BASHER v4.0                          │
 │                                                         │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
 │  │  Cloudflare  │  │  DNS Ghost   │  │   FastAPI    │ │
 │  │   Tunnel     │  │   Network    │  │   Monitor    │ │
 │  └──────────────┘  └──────────────┘  └──────────────┘ │
 │                                                         │
+│  ┌────────────────────────────────────────────────────┐│
+│  │           Swarm Router (Multi-Agent Mesh)         ││
+│  └────────────────────────────────────────────────────┘│
+│                                                         │
 ├─────────────────────────────────────────────────────────┤
 │                 XJSON Handler Layer                     │
 ├─────────────────────────────────────────────────────────┤
-│                    HTTP Server                          │
-│                  (port 3000)                            │
+│                    HTTP Server (port 3000)              │
 └─────────────────────────────────────────────────────────┘
          │                    │                    │
          ▼                    ▼                    ▼
-    Cloudflare          Ghost DNS              FastAPI
-    (Public)            (Covert)               (Local)
+    Cloudflare          Ghost DNS              Swarm Nodes
+    (Public)            (Covert)               (Distributed)
 ```
 
 ---
@@ -442,60 +603,66 @@ curl -X POST http://localhost:3000/xjson/run \
 - **Checksums**: Payload integrity validation
 - **Nonces**: Prevents replay attacks
 
+### Swarm Mode
+
+- **Node authentication**: Verify node identity before routing
+- **Rate limiting**: Prevent abuse of broadcast operations
+- **Health checks**: Detect and isolate compromised nodes
+- **Transport security**: Use HTTPS for HTTP-based transports
+
 ### Production Deployment
 
 - Use HTTPS for XJSON endpoints
 - Restrict CORS origins
 - Implement authentication for sensitive handlers
-- Rate limit DNS queries
 - Monitor for anomalous DNS patterns
+- Encrypt swarm communication
 
 ---
 
 ## Troubleshooting
 
-### Cloudflare Tunnel Won't Start
+### Swarm Nodes Not Healthy
+
+```bash
+# Check swarm status
+curl http://localhost:3000/xjson/run \
+  -d '{"program": {"type": "basher.swarm.status", "input": {}}}'
+
+# Force health check
+curl http://localhost:3000/xjson/run \
+  -d '{"program": {"type": "basher.swarm.healthCheck", "input": {}}}'
+
+# Check specific node
+curl http://localhost:8000/health
+```
+
+### DNS Ghost Not Responding
+
+1. Check Ghost DNS engine is running:
+```bash
+sudo systemctl status basher-ghost
+```
+
+2. Test DNS resolution:
+```bash
+dig @localhost -p 5353 ping.test.ghost.asx.net TXT
+```
+
+3. Check Bind9 forwarding:
+```bash
+dig @localhost ghost.asx.net TXT
+```
+
+### Cloudflare Tunnel Issues
 
 ```bash
 # Check if cloudflared is installed
 which cloudflared
 
-# Install if needed
-# macOS
-brew install cloudflare/cloudflare/cloudflared
-
-# Linux
-wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
-sudo mv cloudflared-linux-amd64 /usr/local/bin/cloudflared
-sudo chmod +x /usr/local/bin/cloudflared
-```
-
-### DNS Ghost Not Responding
-
-1. Check resolver is reachable:
-```bash
-dig @1.1.1.1 google.com
-```
-
-2. Test Ghost DNS server:
-```bash
-dig @localhost -p 5353 ping.test.ghost.asx.net TXT
-```
-
-3. Check firewall:
-```bash
-sudo ufw allow 5353/udp
-```
-
-### FastAPI Targets Unreachable
-
-```bash
-# Check if services are running
-curl http://localhost:8000/health
-curl http://localhost:9009/health
-
-# Check BASHER logs
-journalctl -u basher -f
+# Force restart
+curl http://localhost:3000/xjson/run \
+  -d '{"program": {"type": "basher.forceCloudflareRestart", "input": {}}}'
 ```
 
 ---
@@ -504,11 +671,13 @@ journalctl -u basher -f
 
 - [ ] SCXQ2 v2 compression algorithm
 - [ ] DNS-over-HTTPS (DoH) support
-- [ ] Multi-agent mesh networking
-- [ ] Swarm mode (agent-to-agent routing)
-- [ ] KUHUL direct integration
-- [ ] Mx2LM actor switching via DNS
-- [ ] Ghost Network encryption layer
+- [ ] Swarm consensus protocols
+- [ ] Distributed task queue
+- [ ] Node-to-node direct routing
+- [ ] Encrypted swarm channels
+- [ ] Auto-discovery of swarm nodes
+- [ ] Load balancing across nodes
+- [ ] Swarm analytics and insights
 
 ---
 
@@ -529,6 +698,7 @@ Built with:
 
 ---
 
-**ASX BASHER v3.5 - Ghost Network Mode**
+**ASX BASHER v4.0 - Swarm Mode**
 
 *When the network goes dark, BASHER goes Ghost.*
+*When tasks get complex, BASHER goes Swarm.*

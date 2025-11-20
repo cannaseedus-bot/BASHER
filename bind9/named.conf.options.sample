@@ -1,0 +1,55 @@
+//
+// named.conf.options - Sample Bind9 options for Ghost DNS Server
+//
+// This is a sample configuration. Merge these settings into your existing
+// /etc/bind/named.conf.options file.
+//
+
+options {
+    directory "/var/cache/bind";
+
+    // Listen on all interfaces
+    listen-on { any; };
+    listen-on-v6 { any; };
+
+    // Disable recursion for authority-only mode
+    // Set to "yes" if you want to provide recursive DNS as well
+    recursion no;
+
+    // Allow queries from anywhere (adjust for production)
+    allow-query { any; };
+
+    // Optional: Enable DNSSEC validation
+    // dnssec-validation auto;
+
+    // Optional: Upstream forwarders for recursive queries
+    // (only used if recursion is enabled)
+    // forwarders {
+    //      1.1.1.1;
+    //      8.8.8.8;
+    // };
+
+    // Optional: Rate limiting to prevent abuse
+    rate-limit {
+        responses-per-second 100;
+        window 15;
+    };
+
+    // Optional: Query logging
+    // querylog yes;
+
+    // Optional: Statistics
+    // statistics-file "/var/cache/bind/named.stats";
+    // zone-statistics yes;
+};
+
+// Optional: Logging configuration
+// logging {
+//     channel default_log {
+//         file "/var/log/named/default.log" versions 3 size 5m;
+//         severity dynamic;
+//         print-time yes;
+//     };
+//     category default { default_log; };
+//     category queries { default_log; };
+// };

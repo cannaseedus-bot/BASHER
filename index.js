@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 
 /**
- * BASHER v3.5 - Tri-Tunnel Orchestrator Daemon
+ * BASHER v4.0 - Swarm Mode Multi-Agent Mesh Daemon
  *
  * A network daemon that manages:
  * - Cloudflare Tunnel (public HTTP gateway)
  * - DNS Ghost Network (stealth covert channel)
  * - FastAPI Endpoints (local service health)
+ * - Swarm Mode (multi-agent mesh routing)
  *
  * Powered by XJSON Server
  */
@@ -17,6 +18,7 @@ import path from "path";
 import http from "http";
 import coreHandlers from "./handlers/core.js";
 import basherHandlers from "./handlers/basher.js";
+import swarmHandlers from "./handlers/basher-swarm.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,7 +34,7 @@ const BANNER = `
 ║  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝            ║
 ║                                       ║
 ║  B A S H E R   D A E M O N            ║
-║  v3.5 - Ghost Network Mode            ║
+║  v4.0 - Swarm Mode                    ║
 ╚═══════════════════════════════════════╝
 `;
 
@@ -50,14 +52,31 @@ try {
 console.log("\n" + BANNER);
 console.log("Initializing BASHER daemon...\n");
 
+// Create basher handlers first (they contain dnsSend function)
+const basherHandlerMap = basherHandlers(config);
+
+// Extract DNS send function for swarm integration
+const dnsSendFn = async (message) => {
+  // Call basher.dnsSend internally
+  const result = await basherHandlerMap["basher.dnsSend"]({ message });
+  return result.response;
+};
+
+// Create swarm handlers with DNS send function
+const swarmHandlerMap = swarmHandlers(config, dnsSendFn);
+
+// Merge all handlers
 const handlers = {
   ...coreHandlers,
-  ...basherHandlers(config)
+  ...basherHandlerMap,
+  ...swarmHandlerMap
 };
 
 console.log("✓ Handlers loaded:");
 console.log("  - Core handlers:", Object.keys(coreHandlers).length);
-console.log("  - Basher handlers:", Object.keys(basherHandlers(config)).length);
+console.log("  - Basher handlers:", Object.keys(basherHandlerMap).length);
+console.log("  - Swarm handlers:", Object.keys(swarmHandlerMap).length);
+console.log("  - Total handlers:", Object.keys(handlers).length);
 
 // Create lightweight XJSON-compatible server
 const server = http.createServer(async (req, res) => {
@@ -140,7 +159,12 @@ const server = http.createServer(async (req, res) => {
     res.end(JSON.stringify({
       ok: true,
       handlers: Object.keys(handlers),
-      count: Object.keys(handlers).length
+      count: Object.keys(handlers).length,
+      groups: {
+        core: Object.keys(coreHandlers),
+        basher: Object.keys(basherHandlerMap),
+        swarm: Object.keys(swarmHandlerMap)
+      }
     }));
     return;
   }
@@ -151,6 +175,7 @@ const server = http.createServer(async (req, res) => {
     res.end(JSON.stringify({
       ok: true,
       status: "healthy",
+      version: "4.0.0",
       uptime: process.uptime(),
       timestamp: Date.now()
     }));
@@ -184,10 +209,16 @@ server.listen(port, host, () => {
   console.log(`  GET  /health             - Health check`);
   console.log(`  GET  /                   - Browser console\n`);
 
-  console.log("Tri-Tunnel Status:");
+  console.log("System Status:");
   console.log(`  Cloudflare:  ${config.cloudflare?.enabled ? "✓ Enabled" : "✗ Disabled"}`);
   console.log(`  DNS Ghost:   ${config.dnsGhost?.enabled ? "✓ Enabled" : "✗ Disabled"}`);
-  console.log(`  FastAPI:     ${config.fastapi?.enabled ? "✓ Enabled" : "✗ Disabled"}\n`);
+  console.log(`  FastAPI:     ${config.fastapi?.enabled ? "✓ Enabled" : "✗ Disabled"}`);
+  console.log(`  Swarm Mode:  ${config.swarm?.enabled ? "✓ Enabled" : "✗ Disabled"}`);
+  if (config.swarm?.enabled) {
+    console.log(`  Swarm Nodes: ${config.swarm.nodes?.length || 0} configured\n`);
+  } else {
+    console.log();
+  }
 });
 
 // Graceful shutdown

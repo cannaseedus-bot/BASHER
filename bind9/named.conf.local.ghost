@@ -1,0 +1,38 @@
+//
+// named.conf.local - Ghost DNS Authority Zone for ghost.asx.net
+//
+// This configuration makes Bind9 act as the public-facing NS for ghost.asx.net
+// while forwarding all queries to the Ghost DNS engine running locally.
+//
+// Usage:
+//   1. Include this file in your named.conf.local:
+//      include "/etc/bind/named.conf.local.ghost";
+//
+//   2. Start Ghost DNS engine on port 5353:
+//      cd /opt/basher/ghost-server && python3 index.py
+//
+//   3. Restart Bind9:
+//      sudo systemctl restart bind9
+//
+
+// Forward all queries for ghost.asx.net to the Ghost DNS engine
+// running locally on port 5353 (Python/dnslib custom DNS server)
+zone "ghost.asx.net" {
+    type forward;
+    forward only;
+    forwarders {
+        127.0.0.1 port 5353;
+    };
+};
+
+// Optional: Add logging for ghost queries
+// logging {
+//     channel ghost_queries {
+//         file "/var/log/named/ghost-queries.log" versions 3 size 5m;
+//         severity info;
+//         print-time yes;
+//         print-severity yes;
+//         print-category yes;
+//     };
+//     category queries { ghost_queries; };
+// };

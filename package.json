@@ -1,7 +1,7 @@
 {
   "name": "@asx/basher-daemon",
-  "version": "3.5.0",
-  "description": "BASHER v3.5 - Tri-Tunnel Orchestrator with DNS-Ghost Network Mode",
+  "version": "4.0.0",
+  "description": "BASHER v4.0 - Swarm Mode Multi-Agent Mesh with DNS-Ghost Network",
   "type": "module",
   "main": "index.js",
   "scripts": {
@@ -19,7 +19,10 @@
     "cloudflare",
     "khl",
     "kuhul",
-    "ghost-network"
+    "ghost-network",
+    "swarm-mode",
+    "multi-agent",
+    "mesh-network"
   ],
   "author": "ASX Network",
   "license": "MIT",
