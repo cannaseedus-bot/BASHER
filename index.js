@@ -19,6 +19,7 @@ import http from "http";
 import coreHandlers from "./handlers/core.js";
 import basherHandlers from "./handlers/basher.js";
 import swarmHandlers from "./handlers/basher-swarm.js";
+import modelHandlers from "./handlers/model.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -65,17 +66,22 @@ const dnsSendFn = async (message) => {
 // Create swarm handlers with DNS send function
 const swarmHandlerMap = swarmHandlers(config, dnsSendFn);
 
+// Create model handlers
+const modelHandlerMap = modelHandlers(config);
+
 // Merge all handlers
 const handlers = {
   ...coreHandlers,
   ...basherHandlerMap,
-  ...swarmHandlerMap
+  ...swarmHandlerMap,
+  ...modelHandlerMap
 };
 
 console.log("✓ Handlers loaded:");
 console.log("  - Core handlers:", Object.keys(coreHandlers).length);
 console.log("  - Basher handlers:", Object.keys(basherHandlerMap).length);
 console.log("  - Swarm handlers:", Object.keys(swarmHandlerMap).length);
+console.log("  - Model handlers:", Object.keys(modelHandlerMap).length);
 console.log("  - Total handlers:", Object.keys(handlers).length);
 
 // Create lightweight XJSON-compatible server
@@ -163,7 +169,8 @@ const server = http.createServer(async (req, res) => {
       groups: {
         core: Object.keys(coreHandlers),
         basher: Object.keys(basherHandlerMap),
-        swarm: Object.keys(swarmHandlerMap)
+        swarm: Object.keys(swarmHandlerMap),
+        model: Object.keys(modelHandlerMap)
       }
     }));
     return;

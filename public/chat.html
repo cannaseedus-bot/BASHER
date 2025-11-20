@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASX-Qwen Chat · BASHER v4.0</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0a0e1a;
+      --surface: #0f1419;
+      --surface-light: #151b26;
+      --border: #1e2533;
+      --accent: #00d9ff;
+      --accent-soft: rgba(0, 217, 255, 0.1);
+      --success: #00ff9d;
+      --text: #e8f0ff;
+      --text-muted: #7a8699;
+      --danger: #ff4d6d;
+      --font-mono: 'SF Mono', 'Fira Code', Menlo, Monaco, Consolas, monospace;
+      --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-ui);
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      gap: 16px;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--success));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--bg);
+      box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+    }
+
+    .brand-text h1 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 2px;
+      color: var(--text);
+    }
+
+    .brand-text p {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+    }
+
+    .status-pill {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--surface-light);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .status-dot.offline {
+      background: var(--danger);
+      box-shadow: 0 0 8px var(--danger);
+      animation: none;
+    }
+
+    /* Chat Container */
+    #chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      min-height: 0;
+    }
+
+    #chat-log {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Messages */
+    .message {
+      display: flex;
+      gap: 12px;
+      max-width: 85%;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .message-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .message.user .message-avatar {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    .message.assistant .message-avatar {
+      background: linear-gradient(135deg, var(--accent), var(--success));
+      color: var(--bg);
+    }
+
+    .message-content {
+      background: var(--surface-light);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .message.user .message-content {
+      background: var(--accent-soft);
+      border-color: rgba(0, 217, 255, 0.3);
+    }
+
+    .message-meta {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-family: var(--font-mono);
+    }
+
+    .message-thinking {
+      font-style: italic;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 999px;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Input Area */
+    #input-area {
+      padding: 16px 20px;
+      background: var(--surface-light);
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    #input-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+
+    #message-input {
+      flex: 1;
+      min-height: 44px;
+      max-height: 120px;
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: var(--font-ui);
+      font-size: 14px;
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    #message-input:focus {
+      border-color: var(--accent);
+    }
+
+    #message-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    button {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--accent), var(--success));
+      border: none;
+      border-radius: 10px;
+      color: var(--bg);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      font-family: var(--font-ui);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 217, 255, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .controls {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .control-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .control-group label {
+      font-family: var(--font-mono);
+    }
+
+    .control-group input[type="range"] {
+      width: 100px;
+    }
+
+    .control-group input[type="number"] {
+      width: 60px;
+      padding: 4px 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 16px;
+      font-size: 12px;
+    }
+
+    .btn-secondary:hover {
+      background: var(--surface-light);
+      box-shadow: none;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--surface);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-icon">AQ</div>
+      <div class="brand-text">
+        <h1>ASX-Qwen Chat</h1>
+        <p>BASHER v4.0 · XJSON · Fine-tuned Model</p>
+      </div>
+    </div>
+    <div class="status-bar">
+      <div class="status-pill">
+        <div class="status-dot" id="status-dot"></div>
+        <span id="status-text">Connecting...</span>
+      </div>
+      <div class="status-pill">
+        <span id="model-info">Loading...</span>
+      </div>
+    </div>
+  </header>
+
+  <div id="chat-container">
+    <div id="chat-log"></div>
+    <div id="input-area">
+      <div class="controls">
+        <div class="control-group">
+          <label>Temp:</label>
+          <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7">
+          <span id="temp-value">0.7</span>
+        </div>
+        <div class="control-group">
+          <label>Top-P:</label>
+          <input type="range" id="top-p" min="0" max="1" step="0.1" value="0.9">
+          <span id="top-p-value">0.9</span>
+        </div>
+        <div class="control-group">
+          <label>Max Tokens:</label>
+          <input type="number" id="max-tokens" value="512" min="1" max="2048">
+        </div>
+        <button class="btn-secondary" onclick="clearChat()">Clear</button>
+      </div>
+      <div id="input-row">
+        <textarea
+          id="message-input"
+          placeholder="Ask your fine-tuned ASX-Qwen model anything..."
+          rows="1"
+        ></textarea>
+        <button id="send-btn" onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const BASHER_URL = "http://localhost:3000/xjson/run";
+    const MODEL_HANDLER = "model.chat";
+    const HEALTH_HANDLER = "model.health";
+    const INFO_HANDLER = "model.info";
+
+    let messages = [];
+    let isGenerating = false;
+
+    // DOM elements
+    const chatLog = document.getElementById("chat-log");
+    const messageInput = document.getElementById("message-input");
+    const sendBtn = document.getElementById("send-btn");
+    const statusDot = document.getElementById("status-dot");
+    const statusText = document.getElementById("status-text");
+    const modelInfo = document.getElementById("model-info");
+    const tempSlider = document.getElementById("temperature");
+    const tempValue = document.getElementById("temp-value");
+    const topPSlider = document.getElementById("top-p");
+    const topPValue = document.getElementById("top-p-value");
+    const maxTokensInput = document.getElementById("max-tokens");
+
+    // Update slider values
+    tempSlider.addEventListener("input", (e) => {
+      tempValue.textContent = e.target.value;
+    });
+
+    topPSlider.addEventListener("input", (e) => {
+      topPValue.textContent = e.target.value;
+    });
+
+    // Auto-resize textarea
+    messageInput.addEventListener("input", () => {
+      messageInput.style.height = "auto";
+      messageInput.style.height = messageInput.scrollHeight + "px";
+    });
+
+    // Send on Enter (Shift+Enter for newline)
+    messageInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    // Initialize
+    async function init() {
+      await checkHealth();
+      await getModelInfo();
+      addSystemMessage("Ready to chat. Your ASX-Qwen model is loaded.");
+    }
+
+    // Check model health
+    async function checkHealth() {
+      try {
+        const response = await fetch(BASHER_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            program: {
+              type: HEALTH_HANDLER,
+              input: {}
+            }
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.ok && data.model_loaded) {
+          updateStatus("online", "Model Ready");
+        } else {
+          updateStatus("offline", "Model Not Loaded");
+        }
+      } catch (err) {
+        updateStatus("offline", "Connection Error");
+        console.error(err);
+      }
+    }
+
+    // Get model info
+    async function getModelInfo() {
+      try {
+        const response = await fetch(BASHER_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            program: {
+              type: INFO_HANDLER,
+              input: {}
+            }
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.ok && data.model) {
+          modelInfo.textContent = `${data.model.type} · ${data.model.device.toUpperCase()}`;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Update status
+    function updateStatus(status, text) {
+      statusDot.className = status === "online" ? "status-dot" : "status-dot offline";
+      statusText.textContent = text;
+    }
+
+    // Add message to chat
+    function addMessage(role, content, thinking = false) {
+      const messageDiv = document.createElement("div");
+      messageDiv.className = `message ${role}`;
+
+      const avatar = document.createElement("div");
+      avatar.className = "message-avatar";
+      avatar.textContent = role === "user" ? "U" : "A";
+
+      const contentDiv = document.createElement("div");
+      const contentText = document.createElement("div");
+      contentText.className = "message-content";
+
+      if (thinking) {
+        contentText.className += " message-thinking";
+        contentText.innerHTML = `<div class="spinner"></div> Generating response...`;
+      } else {
+        contentText.textContent = content;
+      }
+
+      const meta = document.createElement("div");
+      meta.className = "message-meta";
+      meta.textContent = new Date().toLocaleTimeString();
+
+      contentDiv.appendChild(contentText);
+      contentDiv.appendChild(meta);
+
+      messageDiv.appendChild(avatar);
+      messageDiv.appendChild(contentDiv);
+
+      chatLog.appendChild(messageDiv);
+      chatLog.scrollTop = chatLog.scrollHeight;
+
+      return messageDiv;
+    }
+
+    // Add system message
+    function addSystemMessage(content) {
+      const messageDiv = document.createElement("div");
+      messageDiv.style.textAlign = "center";
+      messageDiv.style.padding = "12px";
+      messageDiv.style.fontSize = "12px";
+      messageDiv.style.color = "var(--text-muted)";
+      messageDiv.style.fontFamily = "var(--font-mono)";
+      messageDiv.textContent = content;
+      chatLog.appendChild(messageDiv);
+    }
+
+    // Send message
+    async function sendMessage() {
+      const content = messageInput.value.trim();
+      if (!content || isGenerating) return;
+
+      // Add user message
+      addMessage("user", content);
+      messages.push({ role: "user", content });
+
+      // Clear input
+      messageInput.value = "";
+      messageInput.style.height = "auto";
+
+      // Show thinking
+      isGenerating = true;
+      sendBtn.disabled = true;
+      const thinkingMsg = addMessage("assistant", "", true);
+
+      // Get parameters
+      const temperature = parseFloat(tempSlider.value);
+      const top_p = parseFloat(topPSlider.value);
+      const max_tokens = parseInt(maxTokensInput.value);
+
+      try {
+        // Call model
+        const response = await fetch(BASHER_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            program: {
+              type: MODEL_HANDLER,
+              input: {
+                messages,
+                temperature,
+                top_p,
+                max_tokens
+              }
+            }
+          })
+        });
+
+        const data = await response.json();
+
+        // Remove thinking message
+        thinkingMsg.remove();
+
+        if (data.ok && data.message) {
+          // Add assistant message
+          addMessage("assistant", data.message);
+          messages.push({ role: "assistant", content: data.message });
+        } else {
+          addMessage("assistant", `Error: ${data.error || "Unknown error"}`);
+        }
+      } catch (err) {
+        thinkingMsg.remove();
+        addMessage("assistant", `Connection error: ${err.message}`);
+      } finally {
+        isGenerating = false;
+        sendBtn.disabled = false;
+      }
+    }
+
+    // Clear chat
+    function clearChat() {
+      if (confirm("Clear chat history?")) {
+        messages = [];
+        chatLog.innerHTML = "";
+        addSystemMessage("Chat cleared. Ready for a new conversation.");
+      }
+    }
+
+    // Initialize on load
+    window.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+</html>
