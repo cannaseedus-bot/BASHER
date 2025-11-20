@@ -1,0 +1,19 @@
+XJSON handler composition rules
+Handlers can return other XJSON programs for chaining.
+Need to define recursion limits and error propagation.
+
+SCXQ2 DNS tunnel packet size optimization
+Current implementation uses 253 byte limit per TXT record.
+Could we compress better with custom dictionary?
+
+K'uhul async execution model
+Handlers run concurrently but need coordination.
+Define happens-before relationships and memory consistency.
+
+Swarm role assignment algorithm
+How do we pick which agent handles which task?
+Need latency-aware routing with fallback chains.
+
+XCFE language bridge safety
+Calling between JS/Python/Shell needs sandboxing.
+Define capability model and resource limits.
