@@ -107,26 +107,126 @@ A mesh network of BASHER nodes with:
 
 ## Installation
 
+### From GitHub
+
+#### Windows (Git Bash)
+
+**Install Git Bash** first: [Download Git for Windows](https://git-scm.com/download/win)
+
+Open **Git Bash** and run:
+
+```bash
+# Clone the repository
+git clone https://github.com/cannaseedus-bot/BASHER.git
+cd BASHER
+
+# Install Node.js dependencies
+npm install
+
+# Install Python dependencies (for Ghost DNS)
+cd ghost-server
+pip install -r requirements.txt
+cd ..
+
+# Start BASHER
+npm start
+```
+
+#### Linux/Mac
+
+```bash
+# Clone via HTTPS
+git clone https://github.com/cannaseedus-bot/BASHER.git
+cd BASHER
+
+# Or clone via SSH
+git clone git@github.com:cannaseedus-bot/BASHER.git
+cd BASHER
+```
+
+#### Install Dependencies
+
+```bash
+# Install Node.js dependencies
+npm install
+
+# Install Python dependencies (for Ghost DNS server)
+cd ghost-server
+pip3 install -r requirements.txt
+cd ..
+```
+
 ### Prerequisites
 
-- Node.js >= 18.0.0
-- Python 3.8+ (for Ghost DNS server)
-- `cloudflared` (optional, for Cloudflare tunnel)
+- **Node.js >= 18.0.0** - [Download here](https://nodejs.org/)
+- **Python 3.8+** (for Ghost DNS server) - [Download here](https://www.python.org/)
+- **Git** - [Download here](https://git-scm.com/)
+- **cloudflared** (optional, for Cloudflare tunnel) - [Download here](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup/installation/)
 
 ### Quick Start
 
 ```bash
+# 1. Clone the repository
+git clone https://github.com/cannaseedus-bot/BASHER.git
 cd BASHER
 
-# Install
-./install.sh
+# 2. Install dependencies
+npm install
 
-# Run daemon
+# 3. Run BASHER daemon
 npm start
 
-# Open browser console
+# 4. Open browser console
 open http://localhost:3000
 ```
+
+### With ASX-Qwen Model (Chat UI)
+
+If you have a fine-tuned ASX-Qwen model:
+
+**Windows (Git Bash):**
+
+```bash
+# 1. Install model server dependencies
+cd model-server
+pip install -r requirements.txt
+
+# 2. Edit model_server.py (line 30) with your model path
+# Example: DEFAULT_MODEL_PATH = r"D:\Downloads\GODMODE_QLORA_PLUS\models\asx-qwen-asx-merged"
+
+# 3. Start model server
+python model_server.py
+
+# 4. Open NEW Git Bash terminal, navigate to BASHER, start daemon
+cd /path/to/BASHER
+npm start
+
+# 5. Open browser to chat UI
+start http://localhost:3000/public/chat.html
+```
+
+**Linux/Mac:**
+
+```bash
+# 1. Install model server dependencies
+cd model-server
+pip install -r requirements.txt
+
+# 2. Edit model path in model_server.py or use env var
+export ASX_MODEL_PATH="/path/to/your/model"
+
+# 3. Start model server
+python model_server.py
+
+# 4. In new terminal, start BASHER
+cd ..
+npm start
+
+# 5. Open chat UI
+open http://localhost:3000/public/chat.html
+```
+
+See [model-server/SETUP.md](model-server/SETUP.md) for complete model setup guide.
 
 ---
 
