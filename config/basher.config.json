@@ -1,0 +1,62 @@
+{
+  "server": {
+    "port": 3000,
+    "host": "0.0.0.0",
+    "enableCors": true
+  },
+  "cloudflare": {
+    "enabled": true,
+    "label": "asx-basher",
+    "url": "http://localhost:3000",
+    "command": "cloudflared",
+    "args": ["tunnel", "--url", "http://localhost:3000"],
+    "heartbeatIntervalSec": 30,
+    "autoRestart": true,
+    "maxRestarts": 5
+  },
+  "dnsGhost": {
+    "enabled": true,
+    "resolver": "1.1.1.1",
+    "domain": "ghost.asx.net",
+    "heartbeatIntervalSec": 60,
+    "tunnel": {
+      "enabled": true,
+      "fragmentSize": 40,
+      "maxFragments": 10,
+      "timeout": 5000,
+      "retries": 3
+    }
+  },
+  "fastapi": {
+    "enabled": true,
+    "targets": [
+      {
+        "name": "fastapi-main",
+        "url": "http://localhost:8000/health",
+        "critical": true
+      },
+      {
+        "name": "fastapi-kuhul",
+        "url": "http://localhost:9009/health",
+        "critical": false
+      },
+      {
+        "name": "fastapi-mx2lm",
+        "url": "http://localhost:8001/health",
+        "critical": false
+      }
+    ],
+    "heartbeatIntervalSec": 15,
+    "timeout": 3000
+  },
+  "network": {
+    "checkIntervalSec": 15,
+    "dnsTestHost": "one.one.one.one",
+    "offlineGracePeriodSec": 60
+  },
+  "logging": {
+    "level": "info",
+    "enableColors": true,
+    "timestampFormat": "ISO"
+  }
+}

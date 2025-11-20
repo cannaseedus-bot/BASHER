@@ -1,0 +1,41 @@
+{
+  "name": "@asx/basher-daemon",
+  "version": "3.5.0",
+  "description": "BASHER v3.5 - Tri-Tunnel Orchestrator with DNS-Ghost Network Mode",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "ghost-server": "cd ghost-server && python3 index.py",
+    "test": "node test/runner.js"
+  },
+  "keywords": [
+    "asx",
+    "basher",
+    "xjson",
+    "dns-tunnel",
+    "scxq2",
+    "cloudflare",
+    "khl",
+    "kuhul",
+    "ghost-network"
+  ],
+  "author": "ASX Network",
+  "license": "MIT",
+  "dependencies": {
+    "@xjson/xjson-server": "^1.0.0",
+    "@xjson/xjson-runtime-js": "^1.0.0",
+    "asx-language-framework": "^1.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cannaseedus-bot/BASHER.git"
+  }
+}

@@ -1,0 +1,38 @@
+[Unit]
+Description=BASHER v3.5 - Tri-Tunnel Orchestrator Daemon
+Documentation=https://github.com/cannaseedus-bot/BASHER
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=basher
+Group=basher
+WorkingDirectory=/opt/basher
+ExecStart=/usr/bin/node index.js
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=basher
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/basher
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=512
+
+# Environment
+Environment="NODE_ENV=production"
+Environment="BASHER_MODE=daemon"
+
+[Install]
+WantedBy=multi-user.target

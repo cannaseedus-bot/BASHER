@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASX BASHER Console</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            font-family: 'Courier New', 'Consolas', monospace;
+            color: #0f0;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #terminal {
+            width: 100%;
+            height: 100vh;
+            background: #000;
+            padding: 20px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .banner {
+            color: #0ff;
+            margin-bottom: 20px;
+            white-space: pre;
+            font-size: 12px;
+        }
+
+        .output {
+            margin-bottom: 10px;
+        }
+
+        .prompt {
+            color: #ff0;
+        }
+
+        .error {
+            color: #f00;
+        }
+
+        .success {
+            color: #0f0;
+        }
+
+        .info {
+            color: #0ff;
+        }
+
+        .command {
+            color: #fff;
+        }
+
+        #input-line {
+            display: flex;
+            align-items: center;
+        }
+
+        #prompt-text {
+            color: #ff0;
+            margin-right: 5px;
+        }
+
+        #input {
+            background: transparent;
+            border: none;
+            color: #0f0;
+            font-family: inherit;
+            font-size: inherit;
+            outline: none;
+            flex: 1;
+            caret-color: #0f0;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background: #0f0;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        .asx-badge {
+            color: #0f0;
+            font-weight: bold;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #0f0;
+        }
+    </style>
+</head>
+<body>
+    <div id="terminal">
+        <div class="banner">╔═══════════════════════════════════════╗
+║   █████╗ ███████╗██╗  ██╗            ║
+║  ██╔══██╗██╔════╝╚██╗██╔╝            ║
+║  ███████║███████╗ ╚███╔╝             ║
+║  ██╔══██║╚════██║ ██╔██╗             ║
+║  ██║  ██║███████║██╔╝ ██╗            ║
+║  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝            ║
+║                                       ║
+║  B A S H E R   C O N S O L E          ║
+║  v3.5 - Ghost Network Mode            ║
+╚═══════════════════════════════════════╝
+
+ASX BASHER v3.5.0 | Browser Edition
+Type 'help' for commands
+</div>
+        <div id="output"></div>
+        <div id="input-line">
+            <span id="prompt-text">&gt;</span>
+            <input type="text" id="input" autocomplete="off" autofocus>
+        </div>
+    </div>
+
+    <script type="module">
+        import { ASXMx2LM } from './engine/asx-mx2lm.js';
+
+        let mx2lm = null;
+        let history = [];
+        let historyIndex = -1;
+        let currentDir = '/home/user';
+        let filesystem = {
+            '/': {
+                'home': {
+                    'user': {
+                        'readme.txt': 'Welcome to ASX BASHER Ghost Network!',
+                        'projects': {}
+                    }
+                }
+            }
+        };
+
+        const output = document.getElementById('output');
+        const input = document.getElementById('input');
+        const promptText = document.getElementById('prompt-text');
+
+        // Initialize Mx2LM (optional, will fail gracefully)
+        (async () => {
+            try {
+                mx2lm = new ASXMx2LM();
+                await mx2lm.loadModels();
+                await mx2lm.loadActors();
+                print('✓ Mx2LM engine loaded', 'success');
+            } catch (e) {
+                print('⚠ Mx2LM not available (optional component)', 'info');
+            }
+        })();
+
+        function print(text, className = '') {
+            const div = document.createElement('div');
+            div.className = `output ${className}`;
+            div.textContent = text;
+            output.appendChild(div);
+            scrollToBottom();
+        }
+
+        function printHTML(html) {
+            const div = document.createElement('div');
+            div.className = 'output';
+            div.innerHTML = html;
+            output.appendChild(div);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function updatePrompt() {
+            let dir = currentDir.replace('/home/user', '~');
+            if (dir.length > 30) {
+                dir = '...' + dir.slice(-27);
+            }
+            promptText.innerHTML = `<span class="info">${dir}</span> <span class="prompt">&gt;</span>`;
+        }
+
+        async function xjsonCall(type, input = {}) {
+            try {
+                const response = await fetch('/xjson/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        program: { type, input }
+                    })
+                });
+
+                return await response.json();
+            } catch (err) {
+                return { ok: false, error: err.message };
+            }
+        }
+
+        const commands = {
+            help: () => {
+                printHTML(`
+<span class="info">ASX BASHER Console Commands</span>
+============================
+
+<span class="success">XJSON COMMANDS:</span>
+  basher-status       Full BASHER daemon status
+  basher-network      Network and endpoints
+  dns-ping            Ping DNS ghost network
+  dns-send [msg]      Send message via DNS tunnel
+  handlers            List available XJSON handlers
+
+<span class="success">SYSTEM:</span>
+  core-ping           Ping daemon
+  core-info           System information
+  core-stats          Process statistics
+
+<span class="success">TERMINAL:</span>
+  clear               Clear screen
+  history             Show command history
+  help                This message
+  about               About BASHER
+                `);
+            },
+
+            clear: () => {
+                output.innerHTML = '';
+            },
+
+            about: () => {
+                printHTML(`
+<span class="info">ASX BASHER Console v3.5</span>
+============================
+
+Type:        Browser Edition
+Engine:      Tri-Tunnel Orchestrator
+Features:    • Cloudflare Tunnel
+             • DNS Ghost Network
+             • FastAPI Health Checks
+             • SCXQ2 Encoding
+
+<span class="asx-badge">Fast as a jackrabbit. Focused like a neural laser.</span>
+                `);
+            },
+
+            history: () => {
+                history.forEach((cmd, i) => {
+                    print(`  ${i + 1}  ${cmd}`);
+                });
+            },
+
+            handlers: async () => {
+                print('Fetching handlers...', 'info');
+                const result = await xjsonCall('core.ping');
+                if (result.ok) {
+                    const handlers = await fetch('/xjson/handlers');
+                    const data = await handlers.json();
+                    print(`Available handlers (${data.count}):`, 'success');
+                    data.handlers.forEach(h => print(`  • ${h}`));
+                } else {
+                    print('Error: ' + result.error, 'error');
+                }
+            },
+
+            'basher-status': async () => {
+                print('Fetching BASHER status...', 'info');
+                const result = await xjsonCall('basher.status');
+                if (result.ok) {
+                    print('═══════════════════════════════════', 'info');
+                    print('BASHER TRI-TUNNEL STATUS', 'success');
+                    print('═══════════════════════════════════', 'info');
+
+                    const state = result.state;
+
+                    print(`\n🌐 Network: ${state.network.online ? '✓ ONLINE' : '✗ OFFLINE'}`, state.network.online ? 'success' : 'error');
+
+                    print(`\n☁️  Cloudflare: ${state.cloudflare.status.toUpperCase()}`, state.cloudflare.status === 'running' ? 'success' : 'info');
+                    if (state.cloudflare.url) {
+                        print(`   URL: ${state.cloudflare.url}`);
+                    }
+
+                    print(`\n👻 DNS Ghost: ${state.dnsGhost.status.toUpperCase()}`, state.dnsGhost.status === 'online' ? 'success' : 'info');
+                    print(`   Domain: ${state.dnsGhost.domain}`);
+
+                    print(`\n⚡ FastAPI: ${state.fastapi.status.toUpperCase()}`, state.fastapi.status === 'online' ? 'success' : 'info');
+                    print(`   Healthy: ${state.fastapi.healthyTargets.join(', ')}`);
+                } else {
+                    print('Error: ' + result.error, 'error');
+                }
+            },
+
+            'basher-network': async () => {
+                print('Fetching network status...', 'info');
+                const result = await xjsonCall('basher.network');
+                if (result.ok) {
+                    print('Network Endpoints:', 'success');
+                    print(`  Cloudflare: ${result.endpoints.cloudflare || 'N/A'}`);
+                    print(`  DNS Ghost:  ${result.endpoints.dnsGhost}`);
+                    print(`  FastAPI:    ${result.endpoints.fastapi.join(', ')}`);
+                } else {
+                    print('Error: ' + result.error, 'error');
+                }
+            },
+
+            'dns-ping': async () => {
+                print('Pinging DNS ghost network...', 'info');
+                const result = await xjsonCall('basher.dnsPing');
+                if (result.ok) {
+                    print(`Ghost Status: ${result.status}`, result.status === 'online' ? 'success' : 'error');
+                    print(`Latency: ${result.latency}ms`);
+                } else {
+                    print('Error: ' + result.error, 'error');
+                }
+            },
+
+            'dns-send': async (args) => {
+                if (args.length === 0) {
+                    print('Usage: dns-send <message>', 'error');
+                    return;
+                }
+
+                const message = args.join(' ');
+                print(`Sending via DNS tunnel: "${message}"`, 'info');
+                const result = await xjsonCall('basher.dnsSend', { message });
+                if (result.ok) {
+                    print(`Response: ${result.response}`, 'success');
+                    print(`Stats: ${result.stats.messagesSent} sent, ${result.stats.messagesReceived} received`);
+                } else {
+                    print('Error: ' + result.error, 'error');
+                }
+            },
+
+            'core-ping': async () => {
+                const result = await xjsonCall('core.ping');
+                if (result.ok) {
+                    print('PONG', 'success');
+                    print(`Uptime: ${result.uptime.toFixed(2)}s`);
+                } else {
+                    print('Error: ' + result.error, 'error');
+                }
+            },
+
+            'core-info': async () => {
+                const result = await xjsonCall('core.info');
+                if (result.ok) {
+                    print('System Information:', 'info');
+                    print(`  Name: ${result.info.name}`);
+                    print(`  Version: ${result.info.version}`);
+                    print(`  Node: ${result.info.node}`);
+                    print(`  Platform: ${result.info.platform}`);
+                    print(`  CPU: ${result.info.cpu.model}`);
+                    print(`  Cores: ${result.info.cpu.cores}`);
+                } else {
+                    print('Error: ' + result.error, 'error');
+                }
+            },
+
+            'core-stats': async () => {
+                const result = await xjsonCall('core.stats');
+                if (result.ok) {
+                    print('Process Statistics:', 'info');
+                    print(`  PID: ${result.stats.pid}`);
+                    print(`  Uptime: ${result.stats.uptime.toFixed(2)}s`);
+                    print(`  Heap: ${(result.stats.memory.heapUsed / 1024 / 1024).toFixed(2)} MB`);
+                } else {
+                    print('Error: ' + result.error, 'error');
+                }
+            }
+        };
+
+        function executeCommand(cmdLine) {
+            cmdLine = cmdLine.trim();
+            if (!cmdLine) return;
+
+            // Add to history
+            history.push(cmdLine);
+            historyIndex = history.length;
+
+            // Parse command
+            const parts = cmdLine.split(' ');
+            const cmd = parts[0];
+            const args = parts.slice(1);
+
+            // Echo command
+            print(`${promptText.textContent} ${cmdLine}`, 'command');
+
+            // Execute
+            if (commands[cmd]) {
+                commands[cmd](args);
+            } else {
+                print(`${cmd}: command not found`, 'error');
+                print('Type "help" for available commands', 'info');
+            }
+        }
+
+        // Input handling
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                executeCommand(input.value);
+                input.value = '';
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    input.value = history[historyIndex];
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (historyIndex < history.length - 1) {
+                    historyIndex++;
+                    input.value = history[historyIndex];
+                } else {
+                    historyIndex = history.length;
+                    input.value = '';
+                }
+            } else if (e.key === 'Tab') {
+                e.preventDefault();
+                const partial = input.value;
+                const matches = Object.keys(commands).filter(c => c.startsWith(partial));
+                if (matches.length === 1) {
+                    input.value = matches[0];
+                }
+            }
+        });
+
+        // Keep focus on input
+        document.addEventListener('click', () => {
+            input.focus();
+        });
+
+        // Initial prompt
+        updatePrompt();
+
+        // Welcome message
+        setTimeout(() => {
+            print('');
+            print('Welcome to ASX BASHER Ghost Network! Type "help" to get started.', 'success');
+            print('Try: basher-status, dns-ping, handlers', 'info');
+            print('');
+        }, 100);
+    </script>
+</body>
+</html>
