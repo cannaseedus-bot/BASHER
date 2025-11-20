@@ -1,4 +1,4 @@
-<img with="600px" src="https://github.com/cannaseedus-bot/BASHER/blob/claude/setup-basher-daemon-016dZdodw71eiUkikUWWLGR4/basher-logo.svg" />
+<img style="width:100%;" src="https://github.com/cannaseedus-bot/BASHER/blob/claude/setup-basher-daemon-016dZdodw71eiUkikUWWLGR4/basher-logo.svg" />
 
 # BASHER v4.0 - Swarm Mode Multi-Agent Mesh
 
