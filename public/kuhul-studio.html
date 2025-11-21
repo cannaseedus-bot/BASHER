@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>K'uhul Studio - Full-Stack Visual Programming</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    background: linear-gradient(135deg, #020307 0%, #0a1028 100%);
+    color: #e8f5ff;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+    overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  header {
+    text-align: center;
+    padding: 30px 0;
+    border-bottom: 2px solid #16f2aa33;
+    margin-bottom: 30px;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    color: #16f2aa;
+    text-shadow: 0 0 20px rgba(22, 242, 170, 0.5);
+    margin-bottom: 10px;
+  }
+
+  .subtitle {
+    color: #8899aa;
+    font-size: 0.9rem;
+  }
+
+  .block-palette {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(6, 11, 24, 0.6);
+    border-radius: 12px;
+    border: 1px solid #16f2aa33;
+  }
+
+  .block {
+    background: linear-gradient(135deg, #0a1520 0%, #0d1a2d 100%);
+    border: 1px solid #16f2aa;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    cursor: grab;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+
+  .block:hover {
+    background: linear-gradient(135deg, #16f2aa22 0%, #00f5ff22 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(22, 242, 170, 0.3);
+  }
+
+  .block:active {
+    cursor: grabbing;
+  }
+
+  .editor-area {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .editor-panel {
+    background: rgba(6, 11, 24, 0.8);
+    border-radius: 12px;
+    border: 1px solid #16f2aa33;
+    padding: 15px;
+  }
+
+  .panel-header {
+    font-size: 1.1rem;
+    color: #16f2aa;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #16f2aa33;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 400px;
+    background: #050814;
+    color: #e8f5ff;
+    border: 1px solid #16f2aa55;
+    border-radius: 8px;
+    padding: 12px;
+    font-family: 'JetBrains Mono', 'Monaco', monospace;
+    font-size: 0.85rem;
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  textarea::placeholder {
+    color: #555;
+  }
+
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    border-radius: 999px;
+    border: none;
+    padding: 10px 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #16f2aa 0%, #00f5ff 100%);
+    color: #020307;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(22, 242, 170, 0.4);
+  }
+
+  .btn-secondary {
+    background: rgba(22, 242, 170, 0.1);
+    color: #16f2aa;
+    border: 1px solid #16f2aa;
+  }
+
+  .btn-secondary:hover {
+    background: rgba(22, 242, 170, 0.2);
+  }
+
+  pre {
+    background: #000;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 0.8rem;
+    overflow: auto;
+    max-height: 300px;
+    border: 1px solid #16f2aa22;
+  }
+
+  .execution-log {
+    background: #0a1520;
+    border-left: 3px solid #16f2aa;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 0.8rem;
+    max-height: 300px;
+    overflow-y: auto;
+    border-radius: 4px;
+  }
+
+  .execution-log div {
+    padding: 4px 0;
+    border-bottom: 1px solid #16f2aa22;
+  }
+
+  .execution-log div:last-child {
+    border-bottom: none;
+  }
+
+  #preview {
+    background: #050814;
+    border-radius: 8px;
+    padding: 15px;
+    min-height: 300px;
+    border: 1px solid #16f2aa33;
+  }
+
+  #threejs-container {
+    width: 100%;
+    height: 400px;
+    background: #000;
+    border-radius: 8px;
+    margin-top: 10px;
+    border: 1px solid #16f2aa22;
+  }
+
+  .stats-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: linear-gradient(135deg, #060b18 0%, #0a1530 100%);
+    border: 1px solid #16f2aa;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 1.8rem;
+    color: #16f2aa;
+    font-weight: bold;
+  }
+
+  .stat-label {
+    color: #8899aa;
+    font-size: 0.75rem;
+    margin-top: 5px;
+  }
+
+  .status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #16f2aa;
+    margin-right: 5px;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .glyph-reference {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  .glyph-card {
+    background: rgba(10, 20, 40, 0.5);
+    border: 1px solid #16f2aa33;
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 0.75rem;
+  }
+
+  .glyph-name {
+    color: #16f2aa;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+
+  .glyph-desc {
+    color: #8899aa;
+  }
+
+  @media (max-width: 1024px) {
+    .editor-area {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="/public/js/kuhul-threejs.js"></script>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>K'uhul Studio</h1>
+    <div class="subtitle">
+      <span class="status-indicator"></span>
+      Full-Stack Visual Programming: DOM + Networking + Three.js
+    </div>
+  </header>
+
+  <div class="stats-panel">
+    <div class="stat-card">
+      <div class="stat-value" id="bytecode-size">0</div>
+      <div class="stat-label">Bytecode Size</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="function-count">0</div>
+      <div class="stat-label">Functions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="operation-count">0</div>
+      <div class="stat-label">Operations</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="execution-time">0ms</div>
+      <div class="stat-label">Execution Time</div>
+    </div>
+  </div>
+
+  <div class="panel-header">Visual Block Palette</div>
+  <div class="block-palette">
+    <div class="block" onclick="addBlock('DOM')" title="DOM manipulation">
+      📄 DOM Block
+    </div>
+    <div class="block" onclick="addBlock('NETWORK')" title="HTTP requests">
+      🌐 Network Block
+    </div>
+    <div class="block" onclick="addBlock('3D')" title="Three.js 3D graphics">
+      🎮 3D Graphics
+    </div>
+    <div class="block" onclick="addBlock('UI')" title="UI components">
+      🎨 UI Component
+    </div>
+    <div class="block" onclick="addBlock('API')" title="REST API call">
+      🔌 REST API
+    </div>
+    <div class="block" onclick="addBlock('ANIMATION')" title="Animation loop">
+      ⚡ Animation
+    </div>
+    <div class="block" onclick="addBlock('FUNCTION')" title="New function">
+      ⚙️ Function
+    </div>
+    <div class="block" onclick="addBlock('LOOP')" title="Loop structure">
+      🔄 Loop
+    </div>
+  </div>
+
+  <div class="editor-area">
+    <div class="editor-panel">
+      <div class="panel-header">K'uhul Source Code</div>
+      <textarea id="kuhulSource" placeholder="Enter K'uhul symbolic code..."></textarea>
+      <div class="toolbar">
+        <button class="btn-primary" id="btnCompile">▶ Compile</button>
+        <button class="btn-primary" id="btnExecute">⚡ Execute</button>
+        <button class="btn-secondary" id="btnLoadDemo">📋 Load Demo</button>
+        <button class="btn-secondary" id="btnClear">🗑 Clear</button>
+        <button class="btn-secondary" id="btnExport">💾 Export</button>
+      </div>
+    </div>
+
+    <div class="editor-panel">
+      <div class="panel-header">Compilation Output</div>
+      <pre id="compilationOutput">Ready to compile...</pre>
+    </div>
+  </div>
+
+  <div class="editor-area">
+    <div class="editor-panel">
+      <div class="panel-header">Execution Log</div>
+      <div class="execution-log" id="executionLog">
+        <div>Waiting for execution...</div>
+      </div>
+    </div>
+
+    <div class="editor-panel">
+      <div class="panel-header">Live Preview</div>
+      <div id="preview">
+        <div id="app-container"></div>
+        <div id="threejs-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <details open>
+    <summary style="cursor: pointer; color: #16f2aa; font-size: 1.1rem; margin: 20px 0; padding: 10px; background: rgba(22, 242, 170, 0.1); border-radius: 8px;">
+      📖 K'uhul Glyph Reference
+    </summary>
+    <div class="glyph-reference">
+      <div class="glyph-card">
+        <div class="glyph-name">[Pop name]</div>
+        <div class="glyph-desc">Define function/population</div>
+      </div>
+      <div class="glyph-card">
+        <div class="glyph-name">[Wo value]</div>
+        <div class="glyph-desc">Assign to register</div>
+      </div>
+      <div class="glyph-card">
+        <div class="glyph-name">[Ch'en var]</div>
+        <div class="glyph-desc">Store in memory channel</div>
+      </div>
+      <div class="glyph-card">
+        <div class="glyph-name">[Yax var]</div>
+        <div class="glyph-desc">Load/activate (green)</div>
+      </div>
+      <div class="glyph-card">
+        <div class="glyph-name">[Sek action]</div>
+        <div class="glyph-desc">Execute action (light)</div>
+      </div>
+      <div class="glyph-card">
+        <div class="glyph-name">[Muwan func]</div>
+        <div class="glyph-desc">Call function</div>
+      </div>
+      <div class="glyph-card">
+        <div class="glyph-name">[K'ayab' loop]</div>
+        <div class="glyph-desc">Start animation loop</div>
+      </div>
+      <div class="glyph-card">
+        <div class="glyph-name">[Kumk'u loop]</div>
+        <div class="glyph-desc">End loop</div>
+      </div>
+      <div class="glyph-card">
+        <div class="glyph-name">[Xul]</div>
+        <div class="glyph-desc">End function/return</div>
+      </div>
+    </div>
+  </details>
+</div>
+
+<script src="/public/js/kuhul-compiler.js"></script>
+<script>
+// Load default demo on page load
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btnLoadDemo').click();
+});
+</script>
+</body>
+</html>

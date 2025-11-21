@@ -20,6 +20,7 @@ import coreHandlers from "./handlers/core.js";
 import basherHandlers from "./handlers/basher.js";
 import swarmHandlers from "./handlers/basher-swarm.js";
 import modelHandlers from "./handlers/model.js";
+import kuhulHandlers from "./handlers/kuhul.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -69,12 +70,16 @@ const swarmHandlerMap = swarmHandlers(config, dnsSendFn);
 // Create model handlers
 const modelHandlerMap = modelHandlers(config);
 
+// Create K'uhul handlers
+const kuhulHandlerMap = kuhulHandlers();
+
 // Merge all handlers
 const handlers = {
   ...coreHandlers,
   ...basherHandlerMap,
   ...swarmHandlerMap,
-  ...modelHandlerMap
+  ...modelHandlerMap,
+  ...kuhulHandlerMap
 };
 
 console.log("✓ Handlers loaded:");
@@ -82,6 +87,7 @@ console.log("  - Core handlers:", Object.keys(coreHandlers).length);
 console.log("  - Basher handlers:", Object.keys(basherHandlerMap).length);
 console.log("  - Swarm handlers:", Object.keys(swarmHandlerMap).length);
 console.log("  - Model handlers:", Object.keys(modelHandlerMap).length);
+console.log("  - K'uhul handlers:", Object.keys(kuhulHandlerMap).length);
 console.log("  - Total handlers:", Object.keys(handlers).length);
 
 // Create lightweight XJSON-compatible server
