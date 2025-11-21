@@ -22,6 +22,7 @@ import swarmHandlers from "./handlers/basher-swarm.js";
 import modelHandlers from "./handlers/model.js";
 import kuhulHandlers from "./handlers/kuhul.js";
 import kuhulSVG3DHandlers from "./handlers/kuhul-svg3d.js";
+import janusHandlers from "./handlers/janus.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -77,6 +78,9 @@ const kuhulHandlerMap = kuhulHandlers();
 // Create K'uhul SVG-3D handlers
 const kuhulSVG3DHandlerMap = kuhulSVG3DHandlers();
 
+// Create Janus text-to-image handlers
+const janusHandlerMap = janusHandlers();
+
 // Merge all handlers
 const handlers = {
   ...coreHandlers,
@@ -84,7 +88,8 @@ const handlers = {
   ...swarmHandlerMap,
   ...modelHandlerMap,
   ...kuhulHandlerMap,
-  ...kuhulSVG3DHandlerMap
+  ...kuhulSVG3DHandlerMap,
+  ...janusHandlerMap
 };
 
 console.log("✓ Handlers loaded:");
@@ -94,6 +99,7 @@ console.log("  - Swarm handlers:", Object.keys(swarmHandlerMap).length);
 console.log("  - Model handlers:", Object.keys(modelHandlerMap).length);
 console.log("  - K'uhul handlers:", Object.keys(kuhulHandlerMap).length);
 console.log("  - K'uhul SVG-3D handlers:", Object.keys(kuhulSVG3DHandlerMap).length);
+console.log("  - Janus text-to-image handlers:", Object.keys(janusHandlerMap).length);
 console.log("  - Total handlers:", Object.keys(handlers).length);
 
 // Create lightweight XJSON-compatible server
