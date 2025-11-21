@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K'UHUL SVG-3D Language - Vector Graphics Programming</title>
+    <style>
+        :root {
+            --kuhul-primary: #16f2aa;
+            --kuhul-secondary: #00e0ff;
+            --kuhul-accent: #9966ff;
+            --kuhul-warning: #ffaa00;
+            --kuhul-danger: #ff0066;
+            --kuhul-success: #00cc88;
+            --kuhul-bg: #0a0a1a;
+            --kuhul-panel: #070b12;
+            --kuhul-text: #e9f5ff;
+            --kuhul-muted: #7b8a9a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--kuhul-bg);
+            color: var(--kuhul-text);
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid rgba(22, 242, 170, 0.3);
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--kuhul-primary);
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--kuhul-secondary);
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+
+        .language-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .language-card {
+            background: var(--kuhul-panel);
+            border: 1px solid rgba(22, 242, 170, 0.2);
+            border-radius: 10px;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .language-card:hover {
+            border-color: var(--kuhul-primary);
+            box-shadow: 0 0 20px rgba(22, 242, 170, 0.2);
+        }
+
+        .card-title {
+            color: var(--kuhul-primary);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            border-bottom: 1px solid rgba(22, 242, 170, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .demo-area {
+            background: var(--kuhul-panel);
+            border: 1px solid rgba(22, 242, 170, 0.3);
+            border-radius: 10px;
+            padding: 30px;
+            margin-top: 40px;
+            min-height: 600px;
+        }
+
+        .demo-title {
+            color: var(--kuhul-accent);
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .control-btn {
+            background: rgba(22, 242, 170, 0.1);
+            border: 1px solid var(--kuhul-primary);
+            color: var(--kuhul-text);
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(22, 242, 170, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(22, 242, 170, 0.3);
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            border-left: 3px solid var(--kuhul-primary);
+        }
+
+        .visualization-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .visualization-area {
+                grid-template-columns: 1fr;
+            }
+            .language-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .svg-container {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 300px;
+            border: 1px solid rgba(22, 242, 170, 0.2);
+        }
+
+        .output-console {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            min-height: 300px;
+            overflow-y: auto;
+            border: 1px solid rgba(22, 242, 170, 0.2);
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .log-timestamp {
+            color: var(--kuhul-muted);
+            margin-right: 10px;
+        }
+
+        .log-message {
+            color: var(--kuhul-text);
+        }
+
+        .log-warning {
+            color: var(--kuhul-warning);
+        }
+
+        .log-error {
+            color: var(--kuhul-danger);
+        }
+
+        .log-success {
+            color: var(--kuhul-success);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>K'UHUL SVG-3D PROGRAMMING LANGUAGE</h1>
+            <div class="subtitle">ASC Cipher + SCX Compression for Vector Graphics Control Systems</div>
+        </header>
+
+        <div class="language-grid">
+            <!-- Core Language Features -->
+            <div class="language-card">
+                <h3 class="card-title">🔤 ASC Cipher Foundation</h3>
+                <p>Vector-native encryption system using SVG path commands as cipher primitives.</p>
+
+                <div class="code-block">
+// ASC Cipher Primitives
+(⤍)  // Vector Encryption
+(⤎)  // Vector Decryption
+(⤏)  // Path-based Key Derivation
+(⤐)  // Bezier Curve Cryptography
+                </div>
+
+                <div class="code-block">
+// Example: Encrypt data using SVG path
+(⤍) user.data (⤏) "M0,0 C100,50 200,150 300,0"
+(⤎) encrypted.data (⤐) bezier-curve-key
+                </div>
+            </div>
+
+            <!-- SCX Compression -->
+            <div class="language-card">
+                <h3 class="card-title">🗜️ SCX Vector Compression</h3>
+                <p>Geometric compression algorithms for SVG/3D data using spatial relationships.</p>
+
+                <div class="code-block">
+// SCX Compression Operators
+(↻)  // Rotational Compression
+(↔)  // Symmetrical Compression
+(⤒)  // Hierarchical Compression
+(⤓)  // Progressive Detail
+                </div>
+
+                <div class="code-block">
+// Compress complex 3D mesh
+mesh.compress (↻) 45deg (↔) symmetry-plane
+mesh.refine (⤒) 3 levels (⤓) adaptive-detail
+                </div>
+            </div>
+
+            <!-- 3D Vector Control -->
+            <div class="language-card">
+                <h3 class="card-title">🎮 3D Vector Control Flow</h3>
+                <p>Spatial control structures that traditional languages cannot express.</p>
+
+                <div class="code-block">
+// 3D Control Flow Operators
+(⟲)  // Spherical Loop
+(⤦)  // Vector Conditional
+(⤧)  // Path-based Iteration
+(⤨)  // Gradient Flow Control
+                </div>
+
+                <div class="code-block">
+// Spherical data processing
+(⟲) sphere.radius 360deg {
+    (⤦) point.visible? (⤧) process-point
+    (⤨) gradient-fade 0.8
+}
+                </div>
+            </div>
+
+            <!-- Neural Vector Integration -->
+            <div class="language-card">
+                <h3 class="card-title">🧠 Neural Vector Operations</h3>
+                <p>Direct neural network operations on vector graphics primitives.</p>
+
+                <div class="code-block">
+// Neural Vector Operators
+(⟿)  // Neural Path Generation
+(⤂)  // Weight Vector Application
+(⤃)  // Activation Shape Morph
+(⤄)  // Gradient Backpropagation
+                </div>
+
+                <div class="code-block">
+// Neural SVG generation
+network.input (⟿) generate-path
+layer.weights (⤂) apply-to-geometry
+activation (⤃) morph-shapes
+training (⤄) backprop-vectors
+                </div>
+            </div>
+        </div>
+
+        <!-- INTERACTIVE DEMO AREA -->
+        <div class="demo-area">
+            <h2 class="demo-title">SVG-3D LANGUAGE PLAYGROUND</h2>
+
+            <div class="controls">
+                <button class="control-btn" onclick="executeVectorEncryption()">RUN VECTOR ENCRYPTION</button>
+                <button class="control-btn" onclick="executeSCXCompression()">EXECUTE SCX COMPRESSION</button>
+                <button class="control-btn" onclick="run3DControlFlow()">3D CONTROL FLOW</button>
+                <button class="control-btn" onclick="neuralVectorOperations()">NEURAL VECTOR OPS</button>
+                <button class="control-btn" onclick="clearOutput()">CLEAR OUTPUT</button>
+            </div>
+
+            <div class="visualization-area">
+                <div class="svg-container">
+                    <svg id="kuhul-svg-demo" width="100%" height="100%" viewBox="0 0 400 300">
+                        <defs>
+                            <linearGradient id="demo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#16f2aa"/>
+                                <stop offset="100%" stop-color="#9966ff"/>
+                            </linearGradient>
+                            <filter id="glow-effect">
+                                <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+                                <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="glow"/>
+                                <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+                            </filter>
+                        </defs>
+                        <!-- Dynamic SVG content will be generated here -->
+                    </svg>
+                </div>
+
+                <div class="output-console" id="output-console">
+                    <div class="log-entry">
+                        <span class="log-timestamp">[00:00:00]</span>
+                        <span class="log-message">K'UHUL SVG-3D Language Runtime Ready</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-timestamp">[00:00:00]</span>
+                        <span class="log-message">ASC Cipher: Vector encryption primitives loaded</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-timestamp">[00:00:00]</span>
+                        <span class="log-message">SCX Compression: Geometric algorithms initialized</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/public/js/kuhul-svg3d.js"></script>
+    <script>
+        // Initialize the SVG-3D Language Runtime
+        const kuhulSVG3D = new KuhulSVG3DLanguage();
+
+        // Demo Functions
+        function executeVectorEncryption() {
+            kuhulSVG3D.log('DEMO', 'Starting Vector Encryption Demo');
+
+            const testData = "K'UHUL Secret Data";
+            const pathKey = "M50,50 C100,100 200,50 250,100 S400,150 350,200";
+
+            const encrypted = kuhulSVG3D.executeOperation('(⤍)', testData, pathKey);
+            kuhulSVG3D.log('DEMO', `Encrypted: ${encrypted}`, 'success');
+
+            const decrypted = kuhulSVG3D.executeOperation('(⤎)', encrypted, pathKey);
+            kuhulSVG3D.log('DEMO', `Decrypted: ${decrypted}`, 'success');
+        }
+
+        function executeSCXCompression() {
+            kuhulSVG3D.log('DEMO', 'Starting SCX Compression Demo');
+
+            const geometry = { points: 1000, size: 1024 };
+            const compressed = kuhulSVG3D.executeOperation('(↻)', geometry, 45);
+            kuhulSVG3D.log('DEMO', `Rotational Compression: ${JSON.stringify(compressed)}`, 'success');
+
+            const symCompressed = kuhulSVG3D.executeOperation('(↔)', geometry, 'vertical');
+            kuhulSVG3D.log('DEMO', `Symmetrical Compression: ${JSON.stringify(symCompressed)}`, 'success');
+        }
+
+        function run3DControlFlow() {
+            kuhulSVG3D.log('DEMO', 'Starting 3D Control Flow Demo');
+
+            kuhulSVG3D.executeOperation('(⟲)', 80, 360, (x, y, angle) => {
+                if (Math.floor(angle * 10) % 3 === 0) { // Log every 3rd iteration
+                    kuhulSVG3D.log('3D-LOOP', `Point at (${x.toFixed(1)}, ${y.toFixed(1)}) angle: ${(angle * 180 / Math.PI).toFixed(1)}°`);
+                }
+            });
+
+            const result = kuhulSVG3D.executeOperation('(⤦)', 'point.visible',
+                () => kuhulSVG3D.log('3D-CONDITIONAL', 'Condition TRUE executed', 'success'),
+                () => kuhulSVG3D.log('3D-CONDITIONAL', 'Condition FALSE executed', 'warning')
+            );
+        }
+
+        function neuralVectorOperations() {
+            kuhulSVG3D.log('DEMO', 'Starting Neural Vector Operations Demo');
+
+            const input = "Generate complex path";
+            const neuralPath = kuhulSVG3D.executeOperation('(⟿)', input);
+            kuhulSVG3D.log('NEURAL-DEMO', `Generated path length: ${neuralPath.length} chars`, 'success');
+
+            const weights = [0.1, 0.5, 0.8, 0.2, 0.9];
+            const geometry = { complexity: 100 };
+            const weighted = kuhulSVG3D.executeOperation('(⤂)', weights, geometry);
+            kuhulSVG3D.log('NEURAL-DEMO', `Weight application: ${JSON.stringify(weighted)}`, 'success');
+        }
+
+        function clearOutput() {
+            const console = document.getElementById('output-console');
+            console.innerHTML = `
+                <div class="log-entry">
+                    <span class="log-timestamp">[${new Date().toLocaleTimeString()}]</span>
+                    <span class="log-message">Output cleared</span>
+                </div>
+            `;
+            kuhulSVG3D.clearSVG();
+        }
+    </script>
+</body>
+</html>
