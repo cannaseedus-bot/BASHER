@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASX Universal Console - BASHER AI System</title>
+    <style>
+        /* SCX Atomic CSS - Compressed Symbolic Classes */
+        [x]{all:unset;display:block;box-sizing:border-box}
+        .⟁F{display:flex}
+        .⟁Fcol{flex-direction:column}
+        .⟁Acenter{align-items:center}
+        .⟁Jcenter{justify-content:center}
+        .⟁Jbetween{justify-content:space-between}
+        .⟁Wrap{flex-wrap:wrap}
+        .⟁Gap1{gap:1rem}
+        .⟁Gap2{gap:2rem}
+        .⟁P1{padding:1rem}
+        .⟁P2{padding:2rem}
+        .⟁Px1{padding-left:1rem;padding-right:1rem}
+        .⟁Px2{padding-left:2rem;padding-right:2rem}
+        .⟁Py1{padding-top:1rem;padding-bottom:1rem}
+        .⟁Mt1{margin-top:1rem}
+        .⟁Wfull{width:100%}
+        .⟁Hfull{height:100%}
+        .⟁Hscreen{height:100vh}
+        .⟁MinH0{min-height:0}
+        .⟁OverflowY{overflow-y:auto}
+        .⟁OverflowHidden{overflow:hidden}
+        .⟁BorderB1{border-bottom:1px solid rgba(22,242,170,0.3)}
+        .⟁BorderR1{border-right:1px solid rgba(22,242,170,0.3)}
+        .⟁BgPrimary{background:#020617}
+        .⟁BgSecondary{background:#0f172a}
+        .⟁BgSurface{background:rgba(15,23,42,0.8)}
+        .⟁BgAccent{background:rgba(22,242,170,0.1)}
+        .⟁BgSuccess{background:rgba(0,255,153,0.1)}
+        .⟁BgDanger{background:rgba(255,0,102,0.1)}
+        .⟁TextPrimary{color:#e8fff6}
+        .⟁TextSecondary{color:#94a3b8}
+        .⟁TextAccent{color:#16f2aa}
+        .⟁TextSuccess{color:#00ff99}
+        .⟁TextDanger{color:#ff0066}
+        .⟁TextGradient{
+            background:linear-gradient(45deg, #16f2aa, #00ffff);
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+        }
+        .⟁FontMono{font-family:'Courier New',monospace}
+        .⟁FontBold{font-weight:bold}
+        .⟁TextXl{font-size:2rem}
+        .⟁TextLg{font-size:1.2rem}
+        .⟁TextSm{font-size:0.9rem}
+        .⟁TextXs{font-size:0.8rem}
+        .⟁UpperCase{text-transform:uppercase}
+        .⟁TrackingWide{letter-spacing:2px}
+        .⟁CursorPointer{cursor:pointer}
+        .⟁Transition{transition:all 0.3s ease}
+        .⟁Rounded{border-radius:8px}
+        .⟁RoundedFull{border-radius:20px}
+        .⟁ShadowGlow{box-shadow:0 0 30px rgba(22,242,170,0.2)}
+        .⟁BorderAccent{border:1px solid #16f2aa}
+        .⟁BorderSuccess{border:1px solid #00ff99}
+        .⟁BorderDanger{border:1px solid #ff0066}
+        .⟁BorderTransparent{border:1px solid transparent}
+
+        /* Grid System */
+        .⟁Grid{display:grid}
+        .⟁GridColsSidebar{grid-template-columns:280px 1fr}
+        .⟁GridRowsHeader{grid-template-rows:80px 1fr 80px}
+        .⟁GridSpanFull{grid-column:1/-1}
+
+        /* Hover States */
+        .⟁HoverBorder:hover{border-color:#16f2aa}
+        .⟁HoverBg:hover{background:rgba(22,242,170,0.05)}
+        .⟁HoverScale:hover{transform:scale(1.02)}
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .⟁Pulse{animation:pulse 2s ease-in-out infinite}
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .⟁SlideIn{animation:slideIn 0.3s ease-out}
+
+        body {
+            margin: 0;
+            background: #020617;
+            color: #e8fff6;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+
+        /* Custom Scrollbar */
+        .⟁OverflowY::-webkit-scrollbar {
+            width: 8px;
+        }
+        .⟁OverflowY::-webkit-scrollbar-track {
+            background: rgba(22,242,170,0.05);
+        }
+        .⟁OverflowY::-webkit-scrollbar-thumb {
+            background: rgba(22,242,170,0.3);
+            border-radius: 4px;
+        }
+        .⟁OverflowY::-webkit-scrollbar-thumb:hover {
+            background: rgba(22,242,170,0.5);
+        }
+
+        /* Cartridge Card Special */
+        .cartridge-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .cartridge-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(22,242,170,0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s;
+            opacity: 0;
+        }
+        .cartridge-card:hover::before {
+            opacity: 1;
+            transform: translateX(50%) translateY(50%) rotate(45deg);
+        }
+
+        /* Status Indicator */
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .status-online {
+            background: #00ff99;
+            box-shadow: 0 0 10px #00ff99;
+        }
+        .status-loading {
+            background: #ffaa00;
+            box-shadow: 0 0 10px #ffaa00;
+        }
+        .status-offline {
+            background: #94a3b8;
+            box-shadow: 0 0 10px #94a3b8;
+        }
+    </style>
+</head>
+<body class="⟁BgPrimary ⟁TextPrimary ⟁FontMono ⟁Hscreen">
+    <!-- ASX Universal Console -->
+    <div class="⟁Grid ⟁GridColsSidebar ⟁GridRowsHeader ⟁Hscreen ⟁BgSecondary" style="gap:1px">
+
+        <!-- Header -->
+        <div class="⟁GridSpanFull ⟁BgSecondary ⟁BorderB1 ⟁F ⟁Acenter ⟁Jbetween ⟁Px2 ⟁ShadowGlow">
+            <div class="⟁F ⟁Acenter ⟁Gap1">
+                <div class="⟁TextXl ⟁FontBold ⟁TextGradient">BASHER CONSOLE</div>
+                <div class="⟁TextSecondary ⟁TextSm">v4.0 - AI Cartridge System</div>
+            </div>
+            <div class="⟁F ⟁Gap1">
+                <div id="statusAI" class="⟁TextSm ⟁BgAccent ⟁BorderAccent ⟁RoundedFull ⟁Px1 ⟁Py1">
+                    <span class="status-dot status-loading ⟁Pulse"></span>AI: CHECKING
+                </div>
+                <div id="statusCartridges" class="⟁TextSm ⟁BgAccent ⟁BorderAccent ⟁RoundedFull ⟁Px1 ⟁Py1">
+                    SLOTS: 0/4
+                </div>
+                <div id="statusHandlers" class="⟁TextSm ⟁BgAccent ⟁BorderAccent ⟁RoundedFull ⟁Px1 ⟁Py1">
+                    HANDLERS: 0
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="⟁BgSurface ⟁BorderR1 ⟁P2 ⟁OverflowY ⟁MinH0">
+            <div class="⟁Fcol ⟁Gap2">
+                <!-- Navigation -->
+                <div>
+                    <div class="⟁TextSecondary ⟁TextXs ⟁UpperCase ⟁TrackingWide">NAVIGATION</div>
+                    <div class="⟁Fcol ⟁Gap1 ⟁Mt1">
+                        <div onclick="showView('dashboard')" class="⟁P1 ⟁BgAccent ⟁BorderAccent ⟁Rounded ⟁CursorPointer ⟁Transition ⟁HoverBg">Dashboard</div>
+                        <div onclick="showView('cartridges')" class="⟁P1 ⟁BgAccent ⟁BorderTransparent ⟁Rounded ⟁CursorPointer ⟁Transition ⟁HoverBorder ⟁HoverBg">Cartridge Library</div>
+                        <div onclick="showView('ai')" class="⟁P1 ⟁BgAccent ⟁BorderTransparent ⟁Rounded ⟁CursorPointer ⟁Transition ⟁HoverBorder ⟁HoverBg">AI Assistant</div>
+                        <div onclick="showView('settings')" class="⟁P1 ⟁BgAccent ⟁BorderTransparent ⟁Rounded ⟁CursorPointer ⟁Transition ⟁HoverBorder ⟁HoverBg">System Status</div>
+                    </div>
+                </div>
+
+                <!-- Active Cartridges -->
+                <div>
+                    <div class="⟁TextSecondary ⟁TextXs ⟁UpperCase ⟁TrackingWide">ACTIVE SLOTS</div>
+                    <div id="activeSlots" class="⟁Fcol ⟁Gap1 ⟁Mt1">
+                        <div class="⟁P1 ⟁BgSurface ⟁BorderTransparent ⟁Rounded ⟁TextSecondary ⟁TextXs">
+                            No cartridges loaded
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Recommendations -->
+                <div>
+                    <div class="⟁TextSecondary ⟁TextXs ⟁UpperCase ⟁TrackingWide">AI SUGGESTIONS</div>
+                    <div id="aiSuggestions" class="⟁Fcol ⟁Gap1 ⟁Mt1">
+                        <div class="⟁P1 ⟁BgAccent ⟁BorderTransparent ⟁Rounded ⟁TextSecondary ⟁TextXs">
+                            Loading AI predictions...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Health -->
+                <div>
+                    <div class="⟁TextSecondary ⟁TextXs ⟁UpperCase ⟁TrackingWide">SYSTEM HEALTH</div>
+                    <div class="⟁Fcol ⟁Gap1 ⟁Mt1">
+                        <div class="⟁P1 ⟁BgSuccess ⟁BorderSuccess ⟁Rounded">
+                            <div class="⟁TextSuccess ⟁TextXs">BASHER CORE</div>
+                            <div class="⟁TextSecondary ⟁TextXs" id="healthCore">Checking...</div>
+                        </div>
+                        <div class="⟁P1 ⟁BgAccent ⟁BorderTransparent ⟁Rounded">
+                            <div class="⟁TextAccent ⟁TextXs">ASX-QWEN AI</div>
+                            <div class="⟁TextSecondary ⟁TextXs" id="healthQwen">Checking...</div>
+                        </div>
+                        <div class="⟁P1 ⟁BgAccent ⟁BorderTransparent ⟁Rounded">
+                            <div class="⟁TextAccent ⟁TextXs">JANUS T2I</div>
+                            <div class="⟁TextSecondary ⟁TextXs" id="healthJanus">Checking...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="⟁BgPrimary ⟁P2 ⟁OverflowY ⟁MinH0">
+            <!-- Dashboard View -->
+            <div id="viewDashboard" class="⟁Fcol ⟁Gap2">
+                <!-- Hero Section -->
+                <div class="⟁F ⟁Jbetween ⟁Acenter ⟁P2 ⟁BgSurface ⟁BorderAccent ⟁Rounded ⟁ShadowGlow">
+                    <div class="⟁Fcol ⟁Gap1">
+                        <div class="⟁TextSecondary ⟁TextXs ⟁UpperCase ⟁TrackingWide">BASHER UNIVERSAL CONSOLE</div>
+                        <div class="⟁TextXl ⟁FontBold">AI-Powered Cartridge System</div>
+                        <div class="⟁TextSecondary">Smart cartridge management with predictive loading</div>
+                        <div class="⟁F ⟁Gap1 ⟁Mt1">
+                            <div onclick="showView('cartridges')" class="⟁P1 ⟁BgAccent ⟁BorderAccent ⟁Rounded ⟁CursorPointer ⟁Transition ⟁HoverScale">Browse Cartridges</div>
+                            <div onclick="refreshAll()" class="⟁P1 ⟁BgAccent ⟁BorderTransparent ⟁Rounded ⟁CursorPointer ⟁Transition ⟁HoverBorder">Refresh Status</div>
+                        </div>
+                    </div>
+                    <div class="⟁P2 ⟁BgAccent ⟁Rounded">
+                        <div class="⟁TextSecondary">TOTAL HANDLERS</div>
+                        <div id="totalHandlers" class="⟁TextXl ⟁FontBold ⟁TextAccent">0</div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats Grid -->
+                <div class="⟁Grid" style="grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:1rem">
+                    <div class="⟁P2 ⟁BgSurface ⟁Rounded ⟁BorderTransparent ⟁Fcol ⟁Gap1">
+                        <div class="⟁TextSecondary ⟁TextXs">XJSON HANDLERS</div>
+                        <div id="statHandlers" class="⟁TextLg ⟁FontBold ⟁TextAccent">0</div>
+                    </div>
+                    <div class="⟁P2 ⟁BgSurface ⟁Rounded ⟁BorderTransparent ⟁Fcol ⟁Gap1">
+                        <div class="⟁TextSecondary ⟁TextXs">ACTIVE SLOTS</div>
+                        <div id="statSlots" class="⟁TextLg ⟁FontBold ⟁TextSuccess">0 / 4</div>
+                    </div>
+                    <div class="⟁P2 ⟁BgSurface ⟁Rounded ⟁BorderTransparent ⟁Fcol ⟁Gap1">
+                        <div class="⟁TextSecondary ⟁TextXs">AI SYSTEMS</div>
+                        <div id="statAI" class="⟁TextLg ⟁FontBold ⟁TextAccent">0 / 2</div>
+                    </div>
+                    <div class="⟁P2 ⟁BgSurface ⟁Rounded ⟁BorderTransparent ⟁Fcol ⟁Gap1">
+                        <div class="⟁TextSecondary ⟁TextXs">SWARM NODES</div>
+                        <div id="statSwarm" class="⟁TextLg ⟁FontBold ⟁TextSecondary">0</div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div>
+                    <div class="⟁TextSecondary ⟁TextXs ⟁UpperCase ⟁TrackingWide">RECENT ACTIVITY</div>
+                    <div id="activityLog" class="⟁Fcol ⟁Gap1 ⟁Mt1">
+                        <div class="⟁P1 ⟁BgSurface ⟁Rounded ⟁TextSecondary ⟁TextXs">
+                            Console initialized...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cartridges View -->
+            <div id="viewCartridges" class="⟁Fcol ⟁Gap2" style="display:none">
+                <div class="⟁TextXl ⟁FontBold">Cartridge Library</div>
+                <div id="cartridgeGrid" class="⟁Grid" style="grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:1rem">
+                    <!-- Cartridges will be loaded here -->
+                </div>
+            </div>
+
+            <!-- AI View -->
+            <div id="viewAI" class="⟁Fcol ⟁Gap2" style="display:none">
+                <div class="⟁TextXl ⟁FontBold">AI Assistant</div>
+                <div class="⟁P2 ⟁BgSurface ⟁Rounded">
+                    <p class="⟁TextSecondary">AI chat interface coming soon...</p>
+                    <div class="⟁Mt1 ⟁P1 ⟁BgAccent ⟁BorderAccent ⟁Rounded ⟁CursorPointer" onclick="loadCartridge('asx-chat')">
+                        Load ASX-Qwen Chat Cartridge
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings View -->
+            <div id="viewSettings" class="⟁Fcol ⟁Gap2" style="display:none">
+                <div class="⟁TextXl ⟁FontBold">System Status</div>
+                <div id="systemStatus" class="⟁Fcol ⟁Gap1">
+                    <!-- System status will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer/Status -->
+        <div class="⟁GridSpanFull ⟁BgSecondary ⟁BorderB1 ⟁F ⟁Acenter ⟁Jbetween ⟁Px2">
+            <div class="⟁F ⟁Gap2">
+                <div id="footerStatus" class="⟁TextSecondary">INITIALIZING...</div>
+                <div id="footerAI" class="⟁TextAccent"></div>
+            </div>
+            <div class="⟁F ⟁Gap1">
+                <div id="footerTime" class="⟁TextSecondary"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CartridgeAI Brain + BASHER Integration -->
+    <script>
+        // CartridgeAI - Built-in AI for smart cartridge management
+        window.CartridgeAI = {
+            // Available cartridges
+            cartridges: [
+                {
+                    id: 'janus-studio',
+                    name: 'Janus Text-to-Image Studio',
+                    description: 'AI-powered image generation with DeepSeek Janus',
+                    category: 'ai',
+                    handlers: ['janus.generate', 'janus.understand', 'janus.batch'],
+                    status: 'available',
+                    port: 9010
+                },
+                {
+                    id: 'kuhul-svg3d',
+                    name: 'K\'uhul SVG-3D Programming',
+                    description: 'Vector-native spatial programming with ASC Cipher + SCX Compression',
+                    category: 'programming',
+                    handlers: ['svg3d.asc.encrypt', 'svg3d.scx.rotational', 'svg3d.control.spherical'],
+                    status: 'available'
+                },
+                {
+                    id: 'kuhul-studio',
+                    name: 'K\'uhul Visual Programming',
+                    description: 'Maya glyph-based programming with Three.js integration',
+                    category: 'programming',
+                    handlers: ['kuhul.compile', 'kuhul.execute'],
+                    status: 'available'
+                },
+                {
+                    id: 'asx-chat',
+                    name: 'ASX-Qwen AI Chat',
+                    description: 'Local LLM chat interface with ASX-Qwen model',
+                    category: 'ai',
+                    handlers: ['model.chat', 'model.info'],
+                    status: 'available',
+                    port: 9009
+                },
+                {
+                    id: 'basher-swarm',
+                    name: 'Swarm Mode Controller',
+                    description: 'Multi-agent mesh routing and coordination',
+                    category: 'network',
+                    handlers: ['swarm.join', 'swarm.broadcast', 'swarm.agents'],
+                    status: 'available'
+                },
+                {
+                    id: 'xjson-explorer',
+                    name: 'XJSON API Explorer',
+                    description: 'Interactive API testing and documentation',
+                    category: 'tools',
+                    handlers: ['core.help', 'core.list'],
+                    status: 'available'
+                }
+            ],
+
+            // Active cartridge slots
+            slots: {
+                1: null,
+                2: null,
+                3: null,
+                4: null
+            },
+
+            // Suggest cartridges based on context
+            suggestCartridges: function(context) {
+                const suggestions = {
+                    'image-generation': ['janus-studio', 'kuhul-svg3d'],
+                    'ai-experiments': ['asx-chat', 'janus-studio'],
+                    'programming': ['kuhul-studio', 'kuhul-svg3d'],
+                    'network': ['basher-swarm'],
+                    'getting-started': ['xjson-explorer', 'kuhul-studio']
+                };
+                return suggestions[context] || ['janus-studio', 'asx-chat'];
+            },
+
+            // Predict and preload based on time/day
+            predictAndPreload: function() {
+                const hour = new Date().getHours();
+                const isWeekend = [0, 6].includes(new Date().getDay());
+
+                if (hour >= 18 || isWeekend) {
+                    return this.suggestCartridges('ai-experiments');
+                } else {
+                    return this.suggestCartridges('programming');
+                }
+            },
+
+            // Load AI suggestions into UI
+            renderSuggestions: function() {
+                const suggestions = this.predictAndPreload();
+                const container = document.getElementById('aiSuggestions');
+                container.innerHTML = '';
+
+                suggestions.forEach(cartId => {
+                    const cart = this.cartridges.find(c => c.id === cartId);
+                    if (cart) {
+                        const div = document.createElement('div');
+                        div.className = '⟁P1 ⟁BgAccent ⟁BorderTransparent ⟁Rounded ⟁CursorPointer ⟁Transition ⟁HoverBorder';
+                        div.onclick = () => loadCartridge(cartId);
+                        div.innerHTML = `
+                            <div class="⟁TextSm">${cart.name}</div>
+                            <div class="⟁TextSecondary ⟁TextXs">AI recommended</div>
+                        `;
+                        container.appendChild(div);
+                    }
+                });
+            }
+        };
+
+        // BASHER API Integration
+        const BASHER_API = 'http://localhost:3000/xjson/run';
+
+        async function callXJSON(type, input = {}) {
+            try {
+                const response = await fetch(BASHER_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        program: { type, input }
+                    })
+                });
+                return await response.json();
+            } catch (error) {
+                console.error('XJSON call failed:', error);
+                return { ok: false, error: error.message };
+            }
+        }
+
+        // Initialize console
+        async function initConsole() {
+            addActivity('Console initializing...');
+
+            // Check BASHER core
+            const helpResult = await callXJSON('core.help');
+            if (helpResult.ok) {
+                document.getElementById('statusAI').innerHTML = '<span class="status-dot status-online"></span>AI: ONLINE';
+                document.getElementById('healthCore').textContent = 'Online';
+                document.getElementById('footerStatus').textContent = 'READY';
+                addActivity('✓ BASHER core online');
+            } else {
+                document.getElementById('statusAI').innerHTML = '<span class="status-dot status-offline"></span>AI: OFFLINE';
+                document.getElementById('healthCore').textContent = 'Offline';
+                document.getElementById('footerStatus').textContent = 'BASHER OFFLINE';
+                addActivity('✗ BASHER core offline');
+            }
+
+            // Check ASX-Qwen
+            const qwenResult = await callXJSON('model.info');
+            document.getElementById('healthQwen').textContent = qwenResult.ok ? 'Online (Port 9009)' : 'Offline';
+
+            // Check Janus
+            const janusResult = await callXJSON('janus.health');
+            document.getElementById('healthJanus').textContent = janusResult.ok ? 'Online (Port 9010)' : 'Offline';
+
+            // Count handlers
+            const listResult = await callXJSON('core.list');
+            if (listResult.ok) {
+                const handlerCount = listResult.handlers.length;
+                document.getElementById('statusHandlers').textContent = `HANDLERS: ${handlerCount}`;
+                document.getElementById('totalHandlers').textContent = handlerCount;
+                document.getElementById('statHandlers').textContent = handlerCount;
+                addActivity(`✓ Loaded ${handlerCount} XJSON handlers`);
+            }
+
+            // Load AI suggestions
+            CartridgeAI.renderSuggestions();
+
+            // Render cartridge grid
+            renderCartridges();
+
+            // Update AI systems count
+            let aiCount = 0;
+            if (qwenResult.ok) aiCount++;
+            if (janusResult.ok) aiCount++;
+            document.getElementById('statAI').textContent = `${aiCount} / 2`;
+
+            addActivity('✓ Console ready');
+            document.getElementById('footerAI').textContent = 'AI: PREDICTIVE LOADING ACTIVE';
+        }
+
+        // Render cartridge library
+        function renderCartridges() {
+            const grid = document.getElementById('cartridgeGrid');
+            grid.innerHTML = '';
+
+            CartridgeAI.cartridges.forEach(cart => {
+                const div = document.createElement('div');
+                div.className = '⟁P2 ⟁BgSurface ⟁BorderTransparent ⟁Rounded ⟁Fcol ⟁Gap1 cartridge-card ⟁Transition';
+                div.innerHTML = `
+                    <div class="⟁F ⟁Jbetween ⟁Acenter">
+                        <div class="⟁TextAccent ⟁FontBold">${cart.name}</div>
+                        <span class="status-dot ${cart.status === 'available' ? 'status-online' : 'status-offline'}"></span>
+                    </div>
+                    <div class="⟁TextSecondary ⟁TextSm">${cart.description}</div>
+                    <div class="⟁TextXs ⟁TextSecondary">${cart.handlers.length} handlers</div>
+                    <div class="⟁P1 ⟁BgAccent ⟁BorderTransparent ⟁Rounded ⟁CursorPointer ⟁Mt1 ⟁Transition ⟁HoverBorder" onclick="loadCartridge('${cart.id}')">
+                        Load Cartridge
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        // Load cartridge
+        function loadCartridge(cartId) {
+            const cart = CartridgeAI.cartridges.find(c => c.id === cartId);
+            if (!cart) return;
+
+            // Find empty slot
+            let slotNum = null;
+            for (let i = 1; i <= 4; i++) {
+                if (!CartridgeAI.slots[i]) {
+                    slotNum = i;
+                    break;
+                }
+            }
+
+            if (slotNum) {
+                CartridgeAI.slots[slotNum] = cart;
+                updateActiveSlots();
+                addActivity(`✓ Loaded ${cart.name} in Slot ${slotNum}`);
+
+                // Open cartridge URL if applicable
+                const urls = {
+                    'janus-studio': '/public/janus-studio.html',
+                    'kuhul-svg3d': '/public/kuhul-svg3d-interactive.html',
+                    'kuhul-studio': '/public/kuhul-studio.html'
+                };
+
+                if (urls[cartId]) {
+                    window.open(urls[cartId], '_blank');
+                }
+            } else {
+                addActivity('✗ All slots occupied');
+                alert('All cartridge slots are occupied. Unload a cartridge first.');
+            }
+        }
+
+        // Update active slots display
+        function updateActiveSlots() {
+            const container = document.getElementById('activeSlots');
+            const activeCount = Object.values(CartridgeAI.slots).filter(s => s !== null).length;
+
+            document.getElementById('statusCartridges').textContent = `SLOTS: ${activeCount}/4`;
+            document.getElementById('statSlots').textContent = `${activeCount} / 4`;
+
+            container.innerHTML = '';
+            for (let i = 1; i <= 4; i++) {
+                const cart = CartridgeAI.slots[i];
+                const div = document.createElement('div');
+                div.className = cart ?
+                    '⟁P1 ⟁BgAccent ⟁BorderAccent ⟁Rounded ⟁SlideIn' :
+                    '⟁P1 ⟁BgSurface ⟁BorderTransparent ⟁Rounded ⟁TextSecondary ⟁TextXs';
+
+                if (cart) {
+                    div.innerHTML = `
+                        <div class="⟁F ⟁Jbetween ⟁Acenter">
+                            <div>
+                                <div class="⟁TextAccent">SLOT ${i}</div>
+                                <div class="⟁TextSm">${cart.name}</div>
+                            </div>
+                            <div class="⟁CursorPointer" onclick="unloadCartridge(${i})">✕</div>
+                        </div>
+                    `;
+                } else {
+                    div.textContent = `Slot ${i}: Empty`;
+                }
+                container.appendChild(div);
+            }
+        }
+
+        // Unload cartridge
+        function unloadCartridge(slotNum) {
+            const cart = CartridgeAI.slots[slotNum];
+            if (cart) {
+                addActivity(`✓ Unloaded ${cart.name} from Slot ${slotNum}`);
+                CartridgeAI.slots[slotNum] = null;
+                updateActiveSlots();
+            }
+        }
+
+        // Show view
+        function showView(viewName) {
+            const views = ['Dashboard', 'Cartridges', 'AI', 'Settings'];
+            views.forEach(v => {
+                const el = document.getElementById('view' + v);
+                if (el) el.style.display = 'none';
+            });
+
+            const targetView = document.getElementById('view' + viewName.charAt(0).toUpperCase() + viewName.slice(1));
+            if (targetView) targetView.style.display = 'flex';
+        }
+
+        // Add activity log entry
+        function addActivity(message) {
+            const log = document.getElementById('activityLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.className = '⟁P1 ⟁BgSurface ⟁Rounded ⟁TextXs ⟁SlideIn';
+            div.innerHTML = `<span class="⟁TextSecondary">[${timestamp}]</span> ${message}`;
+            log.prepend(div);
+
+            // Keep only last 10 entries
+            while (log.children.length > 10) {
+                log.removeChild(log.lastChild);
+            }
+        }
+
+        // Refresh all
+        async function refreshAll() {
+            addActivity('Refreshing system status...');
+            await initConsole();
+        }
+
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('footerTime').textContent = now.toLocaleTimeString();
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            initConsole();
+            updateActiveSlots();
+            setInterval(updateTime, 1000);
+            updateTime();
+        });
+
+        console.log('🎯 BASHER Console v4.0 initialized');
+        console.log('🎯 AI Suggestions:', CartridgeAI.predictAndPreload());
+    </script>
+</body>
+</html>
